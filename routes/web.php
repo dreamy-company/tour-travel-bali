@@ -12,6 +12,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('/bookings/{booking}', \App\Livewire\Customer\BookingTracker::class)->name('bookings.tracker');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
