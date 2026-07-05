@@ -23,5 +23,4 @@ yarn-error.log
 /.vscode
 /.zed
 
-database_design.md
-srs_document.md
+/.context
