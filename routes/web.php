@@ -4,7 +4,12 @@ use App\Livewire\Auth\GuideRegister;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+})->name('home');
+
 Route::get('/guides', \App\Livewire\Customer\GuideSearch::class)->name('guides.index');
 
 Route::middleware('guest')->group(function () {
