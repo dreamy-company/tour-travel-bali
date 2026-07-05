@@ -235,6 +235,14 @@
         </div>
     </div>
 
+    <!-- In-App Chat Panel -->
+    @if ($booking->status !== \App\Enums\BookingStatus::REJECTED)
+        <div class="space-y-2">
+            <h3 class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{{ __('Communication Channel') }}</h3>
+            @livewire('chat.chat-room', ['bookingId' => $booking->id])
+        </div>
+    @endif
+
     <!-- Rating & Review Modal Overlay -->
     @if ($showReviewModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
