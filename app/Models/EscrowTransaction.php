@@ -30,6 +30,8 @@ use Illuminate\Support\Carbon;
     'platform_commission',
     'guide_net_amount',
     'status',
+    'snap_token',
+    'redirect_url',
 ])]
 class EscrowTransaction extends Model
 {

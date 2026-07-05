@@ -32,98 +32,117 @@
     @php
         $currentStep = match ($booking->status) {
             \App\Enums\BookingStatus::PENDING_CONFIRMATION => 1,
+            \App\Enums\BookingStatus::WAITING_PAYMENT => 1,
             \App\Enums\BookingStatus::CONFIRMED => 2,
             \App\Enums\BookingStatus::HEADING_TO_LOCATION => 3,
             \App\Enums\BookingStatus::ONGOING => 4,
             \App\Enums\BookingStatus::COMPLETED => 5,
             default => 1,
         };
+
+        $steps = [
+            ['title' => 'Request Sent'],
+            ['title' => 'Confirmed'],
+            ['title' => 'Guide En Route'],
+            ['title' => 'Tour Ongoing'],
+            ['title' => 'Completed'],
+        ];
     @endphp
 
     <!-- Timeline Stepper -->
     @if ($booking->status !== \App\Enums\BookingStatus::REJECTED)
-        <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs">
-            <div class="relative flex flex-col md:flex-row justify-between items-center md:items-start gap-8 md:gap-4 my-4">
-                <!-- Track Line -->
-                <div class="absolute left-1/2 md:left-0 top-0 md:top-4 h-full md:h-0.5 w-0.5 md:w-full -translate-x-1/2 md:translate-x-0 bg-zinc-100 dark:bg-zinc-800 z-0"></div>
-                <!-- Progress Line -->
-                <div 
-                    class="absolute left-1/2 md:left-0 top-0 md:top-4 h-full md:h-0.5 w-0.5 md:w-full -translate-x-1/2 md:translate-x-0 bg-emerald-600 dark:bg-emerald-500 transition-all duration-300 z-0"
-                    style="height: {{ $currentStep > 1 && $currentStep < 5 ? (($currentStep - 1) / 4) * 100 : '0' }}%; @media (min-width: 768px) { width: {{ (($currentStep - 1) / 4) * 100 }}%; height: 0.125rem; }"
-                ></div>
+        <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8">
 
-                <!-- Step 1: Pending Confirmation -->
-                <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 1 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
-                        @if ($currentStep === 1)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
-                        @endif
-                        1
+                <div class="relative">
+
+                    {{-- Background line --}}
+                    <div class="absolute top-5 left-0 right-0 h-1 bg-zinc-200 dark:bg-zinc-700 hidden md:block rounded-full"></div>
+
+                    {{-- Progress --}}
+                    <div
+                        class="absolute top-5 left-0 h-1 bg-emerald-500 hidden md:block rounded-full transition-all duration-500"
+                        style="width: {{ (($currentStep-1)/4)*100 }}%">
                     </div>
-                    <div class="space-y-0.5">
-                        <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">{{ __('Request Sent') }}</span>
-                        <span class="text-[10px] text-zinc-400 block">{{ __('Awaiting guide approval') }}</span>
+
+                    <div class="grid grid-cols-5 relative">
+
+                        @foreach($steps as $index => $step)
+
+                            @php
+                                $number = $index + 1;
+
+                                $completed = $number < $currentStep;
+                                $current = $number == $currentStep;
+                            @endphp
+
+                            <div class="flex flex-col items-center">
+
+                                {{-- Circle --}}
+                                <div
+                                    class="
+                                    relative z-10
+                                    flex items-center justify-center
+                                    w-10 h-10 rounded-full
+                                    transition-all duration-300
+
+                                    @if($completed)
+                                        bg-emerald-500 text-white
+                                    @elseif($current)
+                                        bg-emerald-500 text-white ring-4 ring-emerald-100 dark:ring-emerald-900
+                                    @else
+                                        bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 text-zinc-400
+                                    @endif
+                                ">
+
+                                    @if($completed)
+
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="3"
+                                                d="M5 13l4 4L19 7"/>
+                                        </svg>
+
+                                    @else
+
+                                        {{ $number }}
+
+                                    @endif
+
+                                </div>
+
+                                {{-- Text --}}
+                                <div class="mt-3 text-center">
+
+                                    <p class="font-semibold text-sm
+                                    {{ $current || $completed
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-zinc-400'
+                                    }}">
+                                        {{ __($step['title']) }}
+                                    </p>
+
+                                    @if($current)
+                                        <span class="text-xs text-zinc-500">
+                                            Current Step
+                                        </span>
+                                    @endif
+
+                                </div>
+
+                            </div>
+
+                        @endforeach
+
                     </div>
+
                 </div>
 
-                <!-- Step 2: Confirmed -->
-                <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 2 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
-                        @if ($currentStep === 2)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
-                        @endif
-                        2
-                    </div>
-                    <div class="space-y-0.5">
-                        <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">{{ __('Confirmed') }}</span>
-                        <span class="text-[10px] text-zinc-400 block">{{ __('Itinerary accepted') }}</span>
-                    </div>
-                </div>
-
-                <!-- Step 3: En Route -->
-                <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 3 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
-                        @if ($currentStep === 3)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
-                        @endif
-                        3
-                    </div>
-                    <div class="space-y-0.5">
-                        <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">{{ __('Guide En Route') }}</span>
-                        <span class="text-[10px] text-zinc-400 block">{{ __('Guide traveling to pickup') }}</span>
-                    </div>
-                </div>
-
-                <!-- Step 4: Ongoing -->
-                <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 4 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
-                        @if ($currentStep === 4)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
-                        @endif
-                        4
-                    </div>
-                    <div class="space-y-0.5">
-                        <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">{{ __('Tour Ongoing') }}</span>
-                        <span class="text-[10px] text-zinc-400 block">{{ __('Trip is active now') }}</span>
-                    </div>
-                </div>
-
-                <!-- Step 5: Completed -->
-                <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 5 ? 'bg-emerald-650 border-emerald-650 text-white dark:bg-emerald-500 dark:text-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
-                        @if ($currentStep === 5)
-                            <svg class="size-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                        @else
-                            5
-                        @endif
-                    </div>
-                    <div class="space-y-0.5">
-                        <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">{{ __('Completed') }}</span>
-                        <span class="text-[10px] text-zinc-400 block">{{ __('Escrow released') }}</span>
-                    </div>
-                </div>
             </div>
-        </div>
     @else
         <!-- Rejection Banner -->
         <div class="flex gap-4 p-5 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/20 text-red-800 dark:text-red-300">

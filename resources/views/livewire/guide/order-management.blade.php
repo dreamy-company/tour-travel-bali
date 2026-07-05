@@ -145,6 +145,7 @@
                         <div class="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                             @php
                                 $colorClasses = match ($booking->status) {
+                                    App\Enums\BookingStatus::WAITING_PAYMENT => 'bg-amber-50 text-amber-700 ring-amber-700/10 dark:bg-amber-950/20 dark:text-amber-400 dark:ring-amber-500/20',
                                     App\Enums\BookingStatus::CONFIRMED => 'bg-indigo-50 text-indigo-700 ring-indigo-700/10 dark:bg-indigo-950/20 dark:text-indigo-400 dark:ring-indigo-500/20',
                                     App\Enums\BookingStatus::HEADING_TO_LOCATION => 'bg-amber-50 text-amber-700 ring-amber-700/10 dark:bg-amber-950/20 dark:text-amber-400 dark:ring-amber-500/20',
                                     App\Enums\BookingStatus::ONGOING => 'bg-emerald-50 text-emerald-700 ring-emerald-700/10 dark:bg-emerald-950/20 dark:text-emerald-400 dark:ring-emerald-500/20',
@@ -158,7 +159,15 @@
                             </span>
 
                             <!-- Sequential State Progression buttons -->
-                            @if ($booking->status === App\Enums\BookingStatus::CONFIRMED)
+                            @if ($booking->status === App\Enums\BookingStatus::WAITING_PAYMENT)
+                                <span class="inline-flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-semibold px-2.5 py-1">
+                                    <svg class="size-4 animate-spin text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    {{ __('Awaiting Payment') }}
+                                </span>
+                            @elseif ($booking->status === App\Enums\BookingStatus::CONFIRMED)
                                 <button
                                     wire:click="advanceStatus({{ $booking->id }}, 'heading_to_location')"
                                     type="button"

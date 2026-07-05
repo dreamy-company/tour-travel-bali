@@ -227,26 +227,14 @@ class GuideSearch extends Component
                 ]);
             });
 
-            // Request Snap transaction token & redirect URL outside the DB transaction
-            if ($booking) {
-                $midtrans = app(\App\Services\MidtransService::class);
-                $transaction = $midtrans->createSnapTransaction($booking);
-                $redirectUrl = $transaction['redirect_url'];
-            }
-
-            session()->flash('success', __('Booking request submitted successfully! Redirecting to payment...'));
+            session()->flash('success', __('Booking request submitted successfully! Awaiting guide confirmation.'));
 
             $this->selectedGuideId = null;
-
-            if ($redirectUrl) {
-                $this->redirect($redirectUrl, navigate: false);
-            } else {
-                $this->redirect(route('dashboard'), navigate: true);
-            }
+            $this->redirect(route('dashboard'), navigate: true);
         } catch (\Exception $e) {
-            logger()->error('Booking checkout generation failed: ' . $e->getMessage());
+            logger()->error('Booking creation failed: ' . $e->getMessage());
 
-            session()->flash('warning', __('Booking submitted, but payment checkout could not be generated. Please try again later.'));
+            session()->flash('error', __('Booking request could not be processed. Please try again.'));
 
             $this->selectedGuideId = null;
             $this->redirect(route('dashboard'), navigate: true);

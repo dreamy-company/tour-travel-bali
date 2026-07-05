@@ -19,56 +19,121 @@
                         </a>
                     </div>
 
-                    @php
-                        $currentStep = match ($activeBooking->status) {
-                            \App\Enums\BookingStatus::PENDING_CONFIRMATION => 1,
-                            \App\Enums\BookingStatus::CONFIRMED => 2,
-                            \App\Enums\BookingStatus::HEADING_TO_LOCATION => 3,
-                            \App\Enums\BookingStatus::ONGOING => 4,
-                            \App\Enums\BookingStatus::COMPLETED => 5,
-                            default => 1,
-                        };
-                    @endphp
+                @php
+                    $currentStep = match ($activeBooking->status) {
+                        \App\Enums\BookingStatus::PENDING_CONFIRMATION => 1,
+                        \App\Enums\BookingStatus::WAITING_PAYMENT => 1,
+                        \App\Enums\BookingStatus::CONFIRMED => 2,
+                        \App\Enums\BookingStatus::HEADING_TO_LOCATION => 3,
+                        \App\Enums\BookingStatus::ONGOING => 4,
+                        \App\Enums\BookingStatus::COMPLETED => 5,
+                        default => 1,
+                    };
 
-                    <!-- Stepper -->
-                    <div class="relative flex flex-col md:flex-row justify-between items-center md:items-start gap-8 md:gap-4 my-8">
-                        <div class="absolute left-1/2 md:left-0 top-0 md:top-4 h-full md:h-0.5 w-0.5 md:w-full -translate-x-1/2 md:translate-x-0 bg-zinc-100 dark:bg-zinc-800 z-0"></div>
-                        <div class="absolute left-1/2 md:left-0 top-0 md:top-4 h-full md:h-0.5 w-0.5 md:w-full -translate-x-1/2 md:translate-x-0 bg-emerald-600 dark:bg-emerald-500 transition-all duration-300 z-0" style="height: {{ $currentStep > 1 && $currentStep < 5 ? (($currentStep - 1) / 4) * 100 : '0' }}%; @media (min-width: 768px) { width: {{ (($currentStep - 1) / 4) * 100 }}%; height: 0.125rem; }"></div>
+                    $steps = [
+                        ['title' => 'Request Sent'],
+                        ['title' => 'Confirmed'],
+                        ['title' => 'Guide En Route'],
+                        ['title' => 'Tour Ongoing'],
+                        ['title' => 'Completed'],
+                    ];
+                @endphp
 
-                        <!-- Step 1: Request Sent -->
-                        <div class="relative z-10 flex flex-col items-center text-center max-w-xs gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold {{ $currentStep >= 1 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">1</div>
-                            <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">{{ __('Request Sent') }}</span>
+                <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8">
+
+                    <div class="relative">
+
+                        {{-- Background line --}}
+                        <div class="absolute top-5 left-0 right-0 h-1 bg-zinc-200 dark:bg-zinc-700 hidden md:block rounded-full"></div>
+
+                        {{-- Progress --}}
+                        <div
+                            class="absolute top-5 left-0 h-1 bg-emerald-500 hidden md:block rounded-full transition-all duration-500"
+                            style="width: {{ (($currentStep-1)/4)*100 }}%">
                         </div>
 
-                        <!-- Step 2: Confirmed -->
-                        <div class="relative z-10 flex flex-col items-center text-center max-w-xs gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold {{ $currentStep >= 2 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">2</div>
-                            <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">{{ __('Confirmed') }}</span>
+                        <div class="grid grid-cols-5 relative">
+
+                            @foreach($steps as $index => $step)
+
+                                @php
+                                    $number = $index + 1;
+
+                                    $completed = $number < $currentStep;
+                                    $current = $number == $currentStep;
+                                @endphp
+
+                                <div class="flex flex-col items-center">
+
+                                    {{-- Circle --}}
+                                    <div
+                                        class="
+                                        relative z-10
+                                        flex items-center justify-center
+                                        w-10 h-10 rounded-full
+                                        transition-all duration-300
+
+                                        @if($completed)
+                                            bg-emerald-500 text-white
+                                        @elseif($current)
+                                            bg-emerald-500 text-white ring-4 ring-emerald-100 dark:ring-emerald-900
+                                        @else
+                                            bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 text-zinc-400
+                                        @endif
+                                    ">
+
+                                        @if($completed)
+
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                class="w-5 h-5"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="3"
+                                                    d="M5 13l4 4L19 7"/>
+                                            </svg>
+
+                                        @else
+
+                                            {{ $number }}
+
+                                        @endif
+
+                                    </div>
+
+                                    {{-- Text --}}
+                                    <div class="mt-3 text-center">
+
+                                        <p class="font-semibold text-sm
+                                        {{ $current || $completed
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-zinc-400'
+                                        }}">
+                                            {{ __($step['title']) }}
+                                        </p>
+
+                                        @if($current)
+                                            <span class="text-xs text-zinc-500">
+                                                Current Step
+                                            </span>
+                                        @endif
+
+                                    </div>
+
+                                </div>
+
+                            @endforeach
+
                         </div>
 
-                        <!-- Step 3: En Route -->
-                        <div class="relative z-10 flex flex-col items-center text-center max-w-xs gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold {{ $currentStep >= 3 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">3</div>
-                            <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">{{ __('Guide En Route') }}</span>
-                        </div>
-
-                        <!-- Step 4: Ongoing -->
-                        <div class="relative z-10 flex flex-col items-center text-center max-w-xs gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold {{ $currentStep >= 4 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">4</div>
-                            <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">{{ __('Tour Ongoing') }}</span>
-                        </div>
-
-                        <!-- Step 5: Completed -->
-                        <div class="relative z-10 flex flex-col items-center text-center max-w-xs gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold {{ $currentStep >= 5 ? 'bg-emerald-650 border-emerald-650 text-white dark:bg-emerald-500 dark:text-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">5</div>
-                            <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">{{ __('Completed') }}</span>
-                        </div>
                     </div>
+
                 </div>
 
                 <!-- Payment Checkout Card if waiting payment -->
-                @if ($activeBooking->escrowTransaction && $activeBooking->escrowTransaction->status === \App\Enums\EscrowStatus::WAITING_PAYMENT)
+                @if ($activeBooking->status === \App\Enums\BookingStatus::WAITING_PAYMENT && $activeBooking->escrowTransaction && $activeBooking->escrowTransaction->status === \App\Enums\EscrowStatus::WAITING_PAYMENT)
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border border-amber-200 bg-amber-50/50 dark:border-amber-900/30 dark:bg-amber-950/10 p-5 rounded-xl gap-4">
                         <div class="space-y-1">
                             <h4 class="text-sm font-bold text-amber-900 dark:text-amber-300">{{ __('Escrow Payment Required') }}</h4>

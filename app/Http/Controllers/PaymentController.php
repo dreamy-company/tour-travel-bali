@@ -34,13 +34,31 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Unauthorized.'], 403);
         }
 
-        // Only allow checkout if booking is pending confirmation
-        if ($booking->status !== BookingStatus::PENDING_CONFIRMATION) {
+        // Only allow checkout if booking is waiting payment
+        if ($booking->status !== BookingStatus::WAITING_PAYMENT) {
             return response()->json(['error' => 'This booking cannot be checked out in its current state.'], 400);
         }
 
         try {
+            $escrow = $booking->escrowTransaction;
+
+            if ($escrow && $escrow->redirect_url) {
+                return response()->json([
+                    'success' => true,
+                    'token' => $escrow->snap_token,
+                    'redirect_url' => $escrow->redirect_url,
+                ]);
+            }
+
+            // Fallback generation if missing
             $transaction = $this->midtransService->createSnapTransaction($booking);
+
+            if ($escrow) {
+                $escrow->update([
+                    'snap_token' => $transaction['token'],
+                    'redirect_url' => $transaction['redirect_url'],
+                ]);
+            }
 
             return response()->json([
                 'success' => true,

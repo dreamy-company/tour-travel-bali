@@ -85,6 +85,24 @@ class BookingLifecycleTest extends TestCase
             ->call('acceptBooking', $booking->id);
 
         $booking->refresh();
+        $this->assertEquals(BookingStatus::WAITING_PAYMENT, $booking->status);
+
+        // Simulate payment webhook to confirm transaction
+        $orderId = 'BOOK-' . $booking->id . '-' . time();
+        $statusCode = '200';
+        $grossAmount = $booking->total_price;
+        $serverKey = config('services.midtrans.server_key');
+        $signature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+        $this->postJson(route('payment.webhook'), [
+            'order_id' => $orderId,
+            'status_code' => $statusCode,
+            'gross_amount' => $grossAmount,
+            'signature_key' => $signature,
+            'transaction_status' => 'settlement',
+        ])->assertOk();
+
+        $booking->refresh();
         $this->assertEquals(BookingStatus::CONFIRMED, $booking->status);
 
         // 6. Progress status to heading_to_location

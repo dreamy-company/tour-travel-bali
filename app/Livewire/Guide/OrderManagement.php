@@ -44,9 +44,6 @@ class OrderManagement extends Component
             ->get();
     }
 
-    /**
-     * Accept a pending booking request.
-     */
     public function acceptBooking(int $bookingId): void
     {
         $booking = Booking::where('guide_id', Auth::id())
@@ -58,11 +55,30 @@ class OrderManagement extends Component
             return;
         }
 
-        $booking->update([
-            'status' => BookingStatus::CONFIRMED,
-        ]);
+        try {
+            // 1. Generate the Midtrans checkout snap token and redirect URL
+            $midtrans = app(\App\Services\MidtransService::class);
+            $transaction = $midtrans->createSnapTransaction($booking);
 
-        session()->flash('success', __('Booking accepted! Customer has been notified.'));
+            // 2. Update booking and escrow transaction inside a DB transaction
+            \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $transaction): void {
+                $booking->update([
+                    'status' => BookingStatus::WAITING_PAYMENT,
+                ]);
+
+                if ($booking->escrowTransaction) {
+                    $booking->escrowTransaction->update([
+                        'snap_token' => $transaction['token'],
+                        'redirect_url' => $transaction['redirect_url'],
+                    ]);
+                }
+            });
+
+            session()->flash('success', __('Booking accepted! Awaiting customer payment.'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to generate Midtrans snap token on accept: ' . $e->getMessage());
+            session()->flash('error', __('Failed to accept booking because payment checkout could not be generated. Please try again.'));
+        }
     }
 
     /**

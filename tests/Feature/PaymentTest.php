@@ -47,7 +47,7 @@ class PaymentTest extends TestCase
             'schedule_date' => now()->addDays(2)->toDateString(),
             'pickup_time' => '09:00',
             'total_price' => 500000.00,
-            'status' => BookingStatus::PENDING_CONFIRMATION,
+            'status' => BookingStatus::WAITING_PAYMENT,
         ]);
 
         $this->actingAs($customer);
@@ -79,7 +79,7 @@ class PaymentTest extends TestCase
             'schedule_date' => now()->addDays(2)->toDateString(),
             'pickup_time' => '09:00',
             'total_price' => 500000.00,
-            'status' => BookingStatus::PENDING_CONFIRMATION,
+            'status' => BookingStatus::WAITING_PAYMENT,
         ]);
 
         $this->actingAs($otherUser);
@@ -105,7 +105,7 @@ class PaymentTest extends TestCase
             'schedule_date' => now()->addDays(2)->toDateString(),
             'pickup_time' => '09:00',
             'total_price' => 500000.00,
-            'status' => BookingStatus::PENDING_CONFIRMATION,
+            'status' => BookingStatus::WAITING_PAYMENT,
         ]);
 
         $escrow = EscrowTransaction::create([
