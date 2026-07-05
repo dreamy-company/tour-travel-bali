@@ -30,6 +30,9 @@
                         <flux:sidebar.item icon="briefcase" :href="route('guide.services')" :current="request()->routeIs('guide.services')" wire:navigate>
                             {{ __('Manage Services') }}
                         </flux:sidebar.item>
+                        <flux:sidebar.item icon="list-bullet" :href="route('guide.orders')" :current="request()->routeIs('guide.orders')" wire:navigate>
+                            {{ __('Tour Orders') }}
+                        </flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>

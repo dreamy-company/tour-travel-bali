@@ -21,6 +21,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:guide'])->group(function () {
     Route::get('/guide/services', \App\Livewire\Guide\ServiceManagement::class)->name('guide.services');
+    Route::get('/guide/orders', \App\Livewire\Guide\OrderManagement::class)->name('guide.orders');
 });
 
 require __DIR__.'/settings.php';

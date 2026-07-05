@@ -3,11 +3,15 @@
 namespace App\Livewire\Customer;
 
 use App\Enums\BookingStatus;
+use App\Enums\EscrowStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\UserRole;
 use App\Models\Booking;
+use App\Models\EscrowTransaction;
 use App\Models\User;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -190,18 +194,35 @@ class GuideSearch extends Component
             'pickupTime' => ['required', 'string'],
         ]);
 
-        Booking::create([
-            'customer_id' => Auth::id(),
-            'guide_id' => $this->selectedGuideId,
-            'tour_package_id' => null,
-            'pickup_location' => $this->pickupLocation,
-            'dropoff_location' => $this->dropoffLocation ?: null,
-            'custom_destinations' => $this->customDestinations,
-            'schedule_date' => $this->scheduleDate,
-            'pickup_time' => $this->pickupTime,
-            'total_price' => $this->totalPrice(),
-            'status' => BookingStatus::PENDING_CONFIRMATION,
-        ]);
+        DB::transaction(function (): void {
+            $totalPrice = $this->totalPrice();
+
+            $booking = Booking::create([
+                'customer_id' => Auth::id(),
+                'guide_id' => $this->selectedGuideId,
+                'tour_package_id' => null,
+                'pickup_location' => $this->pickupLocation,
+                'dropoff_location' => $this->dropoffLocation ?: null,
+                'custom_destinations' => $this->customDestinations,
+                'schedule_date' => $this->scheduleDate,
+                'pickup_time' => $this->pickupTime,
+                'total_price' => $totalPrice,
+                'status' => BookingStatus::PENDING_CONFIRMATION,
+            ]);
+
+            $commission = $totalPrice * 0.10;
+            $netAmount = $totalPrice - $commission;
+
+            EscrowTransaction::create([
+                'booking_id' => $booking->id,
+                'transaction_reference' => 'TXN-' . str_pad((string) $booking->id, 8, '0', STR_PAD_LEFT) . '-' . strtoupper(bin2hex(random_bytes(4))),
+                'payment_method' => PaymentMethod::QRIS,
+                'gross_amount' => $totalPrice,
+                'platform_commission' => $commission,
+                'guide_net_amount' => $netAmount,
+                'status' => EscrowStatus::WAITING_PAYMENT,
+            ]);
+        });
 
         Flux::toast(variant: 'success', text: __('Booking request submitted successfully!'));
 
