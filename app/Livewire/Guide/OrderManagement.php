@@ -90,7 +90,7 @@ class OrderManagement extends Component
     /**
      * Advance the booking status to the next sequential state.
      */
-    public function advanceStatus(int $bookingId, string $nextState): void
+    public function advanceStatus(int $bookingId, string $nextState, \App\Services\EscrowReleaseService $releaseService): void
     {
         $booking = Booking::where('guide_id', Auth::id())->find($bookingId);
 
@@ -110,9 +110,19 @@ class OrderManagement extends Component
             return;
         }
 
-        $booking->update([
-            'status' => $allowedStates[$nextState],
-        ]);
+        // Run updates inside transaction
+        try {
+            $booking->update([
+                'status' => $allowedStates[$nextState],
+            ]);
+
+            if ($nextState === 'completed') {
+                $releaseService->release($booking);
+            }
+        } catch (\Exception $e) {
+            Flux::toast(variant: 'danger', text: __('Failed to update tour: :error', ['error' => $e->getMessage()]));
+            return;
+        }
 
         Flux::toast(variant: 'success', text: __('Tour status updated to: :status', [
             'status' => ucfirst(str_replace('_', ' ', $nextState)),
