@@ -18,4 +18,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/verification', \App\Livewire\Admin\DocumentVerification::class)->name('admin.verification');
 });
 
+Route::middleware(['auth', 'role:guide'])->group(function () {
+    Route::get('/guide/services', \App\Livewire\Guide\ServiceManagement::class)->name('guide.services');
+});
+
 require __DIR__.'/settings.php';

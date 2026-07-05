@@ -21,6 +21,12 @@
                             {{ __('Guide Verification') }}
                         </flux:sidebar.item>
                     @endif
+
+                    @if (auth()->user()?->role === \App\Enums\UserRole::GUIDE)
+                        <flux:sidebar.item icon="briefcase" :href="route('guide.services')" :current="request()->routeIs('guide.services')" wire:navigate>
+                            {{ __('Manage Services') }}
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
