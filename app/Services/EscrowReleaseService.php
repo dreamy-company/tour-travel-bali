@@ -61,4 +61,47 @@ class EscrowReleaseService
             $wallet->increment('current_balance', $netAmount);
         });
     }
+
+    /**
+     * Administrative override: release escrow on a disputed booking to the guide.
+     * Bypasses the COMPLETED status guard and marks the booking as completed after payout.
+     *
+     * @param Booking $booking
+     * @return void
+     * @throws \RuntimeException
+     */
+    public function releaseForDispute(Booking $booking): void
+    {
+        $escrow = $booking->escrowTransaction;
+
+        if (! $escrow) {
+            throw new \RuntimeException('No escrow transaction found associated with this booking.');
+        }
+
+        if ($escrow->status === EscrowStatus::RELEASED_TO_GUIDE) {
+            return;
+        }
+
+        DB::transaction(function () use ($booking, $escrow): void {
+            $grossAmount = (float) $escrow->gross_amount;
+            $commission = $grossAmount * 0.10;
+            $netAmount = $grossAmount - $commission;
+
+            $escrow->update([
+                'status' => EscrowStatus::RELEASED_TO_GUIDE,
+                'platform_commission' => $commission,
+                'guide_net_amount' => $netAmount,
+            ]);
+
+            $wallet = GuideWallet::firstOrCreate(
+                ['guide_id' => $booking->guide_id],
+                ['current_balance' => 0.00]
+            );
+
+            $wallet->increment('current_balance', $netAmount);
+
+            // Resolve the dispute — mark booking as completed
+            $booking->update(['status' => BookingStatus::COMPLETED]);
+        });
+    }
 }

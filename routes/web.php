@@ -18,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/documents/{profile}/{type}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])->name('admin.documents.show');
     Route::get('/admin/verification', \App\Livewire\Admin\DocumentVerification::class)->name('admin.verification');
+    Route::get('/admin/finance', \App\Livewire\Admin\FinancialManagement::class)->name('admin.finance');
 });
 
 Route::middleware(['auth', 'role:guide'])->group(function () {
