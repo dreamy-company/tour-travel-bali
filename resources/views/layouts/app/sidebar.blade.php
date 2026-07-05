@@ -24,6 +24,9 @@
                         <flux:sidebar.item icon="shield-check" :href="route('admin.verification')" :current="request()->routeIs('admin.verification')" wire:navigate>
                             {{ __('Guide Verification') }}
                         </flux:sidebar.item>
+                        <flux:sidebar.item icon="credit-card" :href="route('admin.finance')" :current="request()->routeIs('admin.finance')" wire:navigate>
+                            {{ __('Withdrawal Approvals') }}
+                        </flux:sidebar.item>
                     @endif
 
                     @if (auth()->user()?->role === \App\Enums\UserRole::GUIDE)
@@ -32,6 +35,9 @@
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="list-bullet" :href="route('guide.orders')" :current="request()->routeIs('guide.orders')" wire:navigate>
                             {{ __('Tour Orders') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="credit-card" :href="route('guide.payouts')" :current="request()->routeIs('guide.payouts')" wire:navigate>
+                            {{ __('Earnings & Payouts') }}
                         </flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>
