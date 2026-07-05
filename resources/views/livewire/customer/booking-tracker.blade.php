@@ -11,8 +11,9 @@
         </div>
     @endif
 
-    <!-- Header Section -->
-    <div class="border-b border-zinc-200 dark:border-zinc-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    @if ($booking)
+        <!-- Header Section -->
+        <div class="border-b border-zinc-200 dark:border-zinc-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h2 class="text-xl font-bold text-zinc-950 dark:text-white">{{ __('Active Tour Tracker') }}</h2>
             <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
@@ -47,15 +48,15 @@
                 <div class="absolute left-1/2 md:left-0 top-0 md:top-4 h-full md:h-0.5 w-0.5 md:w-full -translate-x-1/2 md:translate-x-0 bg-zinc-100 dark:bg-zinc-800 z-0"></div>
                 <!-- Progress Line -->
                 <div 
-                    class="absolute left-1/2 md:left-0 top-0 md:top-4 h-full md:h-0.5 w-0.5 md:w-full -translate-x-1/2 md:translate-x-0 bg-zinc-950 dark:bg-white transition-all duration-300 z-0"
+                    class="absolute left-1/2 md:left-0 top-0 md:top-4 h-full md:h-0.5 w-0.5 md:w-full -translate-x-1/2 md:translate-x-0 bg-emerald-600 dark:bg-emerald-500 transition-all duration-300 z-0"
                     style="height: {{ $currentStep > 1 && $currentStep < 5 ? (($currentStep - 1) / 4) * 100 : '0' }}%; @media (min-width: 768px) { width: {{ (($currentStep - 1) / 4) * 100 }}%; height: 0.125rem; }"
                 ></div>
 
                 <!-- Step 1: Pending Confirmation -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 1 ? 'bg-zinc-950 text-white border-zinc-950 dark:bg-white dark:text-black dark:border-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 1 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
                         @if ($currentStep === 1)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-zinc-400 opacity-25"></span>
+                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
                         @endif
                         1
                     </div>
@@ -67,9 +68,9 @@
 
                 <!-- Step 2: Confirmed -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 2 ? 'bg-zinc-950 text-white border-zinc-950 dark:bg-white dark:text-black dark:border-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 2 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
                         @if ($currentStep === 2)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-zinc-400 opacity-25"></span>
+                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
                         @endif
                         2
                     </div>
@@ -81,9 +82,9 @@
 
                 <!-- Step 3: En Route -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 3 ? 'bg-zinc-950 text-white border-zinc-950 dark:bg-white dark:text-black dark:border-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 3 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
                         @if ($currentStep === 3)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-zinc-400 opacity-25"></span>
+                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
                         @endif
                         3
                     </div>
@@ -95,9 +96,9 @@
 
                 <!-- Step 4: Ongoing -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 4 ? 'bg-zinc-950 text-white border-zinc-950 dark:bg-white dark:text-black dark:border-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 4 ? 'bg-emerald-600 text-white border-emerald-600 dark:bg-emerald-500 dark:text-white dark:border-emerald-500' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
                         @if ($currentStep === 4)
-                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-zinc-400 opacity-25"></span>
+                            <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-emerald-400 opacity-25"></span>
                         @endif
                         4
                     </div>
@@ -109,7 +110,7 @@
 
                 <!-- Step 5: Completed -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-xs group gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 5 ? 'bg-emerald-500 border-emerald-500 text-white dark:bg-emerald-500 dark:text-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 {{ $currentStep >= 5 ? 'bg-emerald-650 border-emerald-650 text-white dark:bg-emerald-500 dark:text-white' : 'bg-white text-zinc-500 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800' }}">
                         @if ($currentStep === 5)
                             <svg class="size-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                         @else
@@ -304,5 +305,28 @@
                 </div>
             </div>
         </div>
+    @endif
+    @else
+        <!-- No Active Trips placeholder -->
+        <div class="flex flex-col items-center justify-center text-center py-20 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-8 shadow-xs gap-4 my-6">
+             <div class="size-16 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-400 dark:text-zinc-600">
+                 <svg class="size-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+             </div>
+             <div class="space-y-1">
+                 <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">{{ __('No Active Trips') }}</h3>
+                 <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
+                     {{ __('You do not have any active tour or itinerary bookings at the moment. Search for tour guides to plan your next journey.') }}
+                 </p>
+             </div>
+             <div class="pt-2">
+                 <a 
+                     href="{{ route('guides.index') }}" 
+                     wire:navigate
+                     class="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-black transition-colors shadow-xs"
+                 >
+                     {{ __('Find a Tour Guide') }}
+                 </a>
+             </div>
+         </div>
     @endif
 </div>

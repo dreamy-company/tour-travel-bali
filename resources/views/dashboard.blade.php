@@ -137,38 +137,7 @@
 
         <!-- 3. CUSTOMER DASHBOARD VIEW -->
         @else
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Welcome Promo -->
-                <div class="lg:col-span-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs flex flex-col justify-between gap-6 relative overflow-hidden">
-                    <!-- Balinese travel design accent -->
-                    <div class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                    <div class="space-y-2 relative z-10">
-                        <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">{{ __('Design Your Balinese Adventure') }}</h3>
-                        <p class="text-xs text-zinc-500 leading-relaxed max-w-lg">
-                            Directly connect with certified Balinese tour guides. Search based on language fluency, average customer review ratings, and customizable pricing rates. Set up your bespoke daily or hourly itineraries.
-                        </p>
-                    </div>
-                    <div class="flex justify-end relative z-10">
-                        <a 
-                            href="{{ route('guides.index') }}" 
-                            class="inline-flex items-center gap-1.5 px-6 py-2.5 text-sm font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 transition-colors shadow-xs"
-                        >
-                            {{ __('Find Tour Guides') }}
-                            <svg class="size-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Info Cards -->
-                <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs flex flex-col justify-between gap-4">
-                    <div>
-                        <h3 class="text-md font-bold text-zinc-900 dark:text-zinc-100">{{ __('中央 Escrow Wallet Security') }}</h3>
-                        <p class="text-[11px] text-zinc-500 leading-relaxed mt-2">
-                            All guide payments pass through our secure platform Escrow. Funds are released to your tour guide only after you confirm the tour was completed safely and without disputes.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            @livewire('customer.customer-dashboard')
         @endif
     </div>
 </x-layouts::app>

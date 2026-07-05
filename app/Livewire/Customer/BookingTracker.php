@@ -15,7 +15,7 @@ use Livewire\Component;
 #[Title('Booking Tracker')]
 class BookingTracker extends Component
 {
-    public Booking $booking;
+    public ?Booking $booking = null;
 
     // Review Form State
     public int $rating = 5;
@@ -25,16 +25,28 @@ class BookingTracker extends Component
     /**
      * Mount the component and authorize user access.
      */
-    public function mount(Booking $booking): void
+    public function mount(?Booking $booking = null): void
     {
-        if ($booking->customer_id !== Auth::id()) {
-            abort(403, 'Unauthorized access to this booking tracker.');
+        if ($booking && $booking->exists) {
+            if ($booking->customer_id !== Auth::id()) {
+                abort(403, 'Unauthorized access to this booking tracker.');
+            }
+            $this->booking = $booking;
+        } else {
+            // Find latest active booking where status is NOT completed or rejected
+            $activeBooking = Booking::where('customer_id', Auth::id())
+                ->whereNotIn('status', [BookingStatus::COMPLETED, BookingStatus::REJECTED])
+                ->latest()
+                ->first();
+
+            if ($activeBooking) {
+                $this->booking = $activeBooking;
+            }
         }
 
-        $this->booking = $booking;
-
-        // Auto-show review modal if completed and not reviewed yet
-        $this->checkReviewStatus();
+        if ($this->booking) {
+            $this->checkReviewStatus();
+        }
     }
 
     /**
@@ -42,8 +54,20 @@ class BookingTracker extends Component
      */
     public function refreshBooking(): void
     {
-        $this->booking->refresh();
-        $this->checkReviewStatus();
+        if ($this->booking) {
+            $this->booking->refresh();
+            $this->checkReviewStatus();
+        } else {
+            $activeBooking = Booking::where('customer_id', Auth::id())
+                ->whereNotIn('status', [BookingStatus::COMPLETED, BookingStatus::REJECTED])
+                ->latest()
+                ->first();
+
+            if ($activeBooking) {
+                $this->booking = $activeBooking;
+                $this->checkReviewStatus();
+            }
+        }
     }
 
     /**
