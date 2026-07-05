@@ -15,6 +15,7 @@ use App\Models\GuideProfile;
 use App\Models\GuideWallet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -27,6 +28,12 @@ class BookingLifecycleTest extends TestCase
      */
     public function test_complete_booking_lifecycle(): void
     {
+        Http::fake([
+            'https://app.sandbox.midtrans.com/*' => Http::response([
+                'token' => 'dummy-snap-token',
+                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/dummy-snap-token',
+            ], 200),
+        ]);
         // 1. Create a customer
         $customer = User::factory()->create([
             'role' => UserRole::CUSTOMER,

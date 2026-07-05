@@ -193,40 +193,64 @@ class GuideSearch extends Component
             'pickupTime' => ['required', 'string'],
         ]);
 
-        DB::transaction(function (): void {
-            $totalPrice = $this->totalPrice();
+        $booking = null;
+        $redirectUrl = null;
 
-            $booking = Booking::create([
-                'customer_id' => Auth::id(),
-                'guide_id' => $this->selectedGuideId,
-                'tour_package_id' => null,
-                'pickup_location' => $this->pickupLocation,
-                'dropoff_location' => $this->dropoffLocation ?: null,
-                'custom_destinations' => $this->customDestinations,
-                'schedule_date' => $this->scheduleDate,
-                'pickup_time' => $this->pickupTime,
-                'total_price' => $totalPrice,
-                'status' => BookingStatus::PENDING_CONFIRMATION,
-            ]);
+        try {
+            DB::transaction(function () use (&$booking): void {
+                $totalPrice = $this->totalPrice();
 
-            $commission = $totalPrice * 0.10;
-            $netAmount = $totalPrice - $commission;
+                $booking = Booking::create([
+                    'customer_id' => Auth::id(),
+                    'guide_id' => $this->selectedGuideId,
+                    'tour_package_id' => null,
+                    'pickup_location' => $this->pickupLocation,
+                    'dropoff_location' => $this->dropoffLocation ?: null,
+                    'custom_destinations' => $this->customDestinations,
+                    'schedule_date' => $this->scheduleDate,
+                    'pickup_time' => $this->pickupTime,
+                    'total_price' => $totalPrice,
+                    'status' => BookingStatus::PENDING_CONFIRMATION,
+                ]);
 
-            EscrowTransaction::create([
-                'booking_id' => $booking->id,
-                'transaction_reference' => 'TXN-' . str_pad((string) $booking->id, 8, '0', STR_PAD_LEFT) . '-' . strtoupper(bin2hex(random_bytes(4))),
-                'payment_method' => PaymentMethod::QRIS,
-                'gross_amount' => $totalPrice,
-                'platform_commission' => $commission,
-                'guide_net_amount' => $netAmount,
-                'status' => EscrowStatus::WAITING_PAYMENT,
-            ]);
-        });
+                $commission = $totalPrice * 0.10;
+                $netAmount = $totalPrice - $commission;
 
-        session()->flash('success', __('Booking request submitted successfully!'));
+                EscrowTransaction::create([
+                    'booking_id' => $booking->id,
+                    'transaction_reference' => 'TXN-' . str_pad((string) $booking->id, 8, '0', STR_PAD_LEFT) . '-' . strtoupper(bin2hex(random_bytes(4))),
+                    'payment_method' => PaymentMethod::QRIS,
+                    'gross_amount' => $totalPrice,
+                    'platform_commission' => $commission,
+                    'guide_net_amount' => $netAmount,
+                    'status' => EscrowStatus::WAITING_PAYMENT,
+                ]);
+            });
 
-        $this->selectedGuideId = null;
-        $this->redirect(route('dashboard'), navigate: true);
+            // Request Snap transaction token & redirect URL outside the DB transaction
+            if ($booking) {
+                $midtrans = app(\App\Services\MidtransService::class);
+                $transaction = $midtrans->createSnapTransaction($booking);
+                $redirectUrl = $transaction['redirect_url'];
+            }
+
+            session()->flash('success', __('Booking request submitted successfully! Redirecting to payment...'));
+
+            $this->selectedGuideId = null;
+
+            if ($redirectUrl) {
+                $this->redirect($redirectUrl, navigate: false);
+            } else {
+                $this->redirect(route('dashboard'), navigate: true);
+            }
+        } catch (\Exception $e) {
+            logger()->error('Booking checkout generation failed: ' . $e->getMessage());
+
+            session()->flash('warning', __('Booking submitted, but payment checkout could not be generated. Please try again later.'));
+
+            $this->selectedGuideId = null;
+            $this->redirect(route('dashboard'), navigate: true);
+        }
     }
 
     /**
