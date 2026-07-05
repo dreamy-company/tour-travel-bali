@@ -243,22 +243,9 @@
                     </div>
                 </div>
 
-                <!-- Maps API Integration placeholder -->
-                <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-zinc-100 dark:bg-zinc-900 flex flex-col items-center justify-center text-center gap-2 relative overflow-hidden h-40">
-                    <!-- Fake Map grid background -->
-                    <div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                    <svg class="size-8 text-zinc-400 dark:text-zinc-600 relative z-10" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-12v8.25m.503 3.446 1.202-.721a1.125 1.125 0 0 1 1.28.087l2.216 1.661a.45.45 0 0 1-.224.818l-4.053-.405a1.125 1.125 0 0 0-1.012.336l-2.072 2.072a1.125 1.125 0 0 1-1.502.1l-4.3-.545a.45.45 0 0 1-.294-.741l3.178-3.178A1.125 1.125 0 0 1 10 13.5H9c0-.228-.09-.448-.25-.61L4.603 8.747a1.125 1.125 0 0 1 0-1.59l3.179-3.179A1.125 1.125 0 0 1 9 3.5h.503a1.125 1.125 0 0 1 .721.258l4.9 4.9Z"/></svg>
-                    <h4 class="text-sm font-bold text-zinc-950 dark:text-zinc-50 relative z-10">{{ __('Maps API Integration Route Preview') }}</h4>
-                    <p class="text-[10px] text-zinc-500 max-w-xs relative z-10">
-                        {{ __('Simulated spatial routing calculates distances and travel time for tourist custom destinations.') }}
-                    </p>
-                    @if (! empty($customDestinations))
-                        <div class="absolute bottom-2 left-2 z-10 flex gap-2">
-                            <span class="bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[9px] font-bold px-2 py-0.5 rounded border border-emerald-500/30">
-                                {{ __('Route Calculated') }}
-                            </span>
-                        </div>
-                    @endif
+                <!-- Leaflet Maps Integration -->
+                <div wire:ignore class="border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs relative z-0">
+                    <div id="map" class="h-96 w-full"></div>
                 </div>
 
                 <!-- Estimation breakdown and Pricing -->
@@ -392,4 +379,160 @@
         @endif
     </div>
 </div>
+
+<style>
+    .custom-div-icon {
+        background: transparent !important;
+        border: none !important;
+    }
+</style>
+
+@assets
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+@endassets
+
+@script
+<script>
+    let map = null;
+    let markers = [];
+    let routeLine = null;
+
+    const placesCoords = {
+        'ubud': [-8.5186, 115.2631],
+        'monkey forest': [-8.5186, 115.2631],
+        'uluwatu': [-8.8291, 115.0849],
+        'kuta': [-8.7224, 115.1672],
+        'batur': [-8.2417, 115.3781],
+        'bedugul': [-8.2752, 115.1652],
+        'tanah lot': [-8.6212, 115.0868],
+        'penida': [-8.7337, 115.4746],
+        'jimbaran': [-8.7844, 115.1611],
+        'seminyak': [-8.6913, 115.1682],
+        'canggu': [-8.6478, 115.1385],
+        'sanur': [-8.6792, 115.2630]
+    };
+
+    function initMap() {
+        const container = document.getElementById('map');
+        if (!container || typeof L === 'undefined') return;
+
+        if (map) {
+            map.remove();
+        }
+
+        map = L.map('map').setView([-8.409518, 115.188919], 10);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        updateRoute();
+    }
+
+    function getStringHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return hash;
+    }
+
+    function getCoordinatesForPlace(placeName) {
+        const lowerName = placeName.toLowerCase();
+        for (const [key, coords] of Object.entries(placesCoords)) {
+            if (lowerName.includes(key)) {
+                return coords;
+            }
+        }
+        const hash = getStringHash(placeName);
+        const latOffset = (hash % 100) / 1000;
+        const lngOffset = ((hash >> 3) % 100) / 1000;
+        return [-8.409518 + latOffset, 115.188919 + lngOffset];
+    }
+
+    function updateRoute() {
+        if (!map) return;
+
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        if (routeLine) {
+            map.removeLayer(routeLine);
+            routeLine = null;
+        }
+
+        const destinations = $wire.customDestinations || [];
+        const coordinates = [];
+
+        const pickup = $wire.pickupLocation;
+        if (pickup && pickup.trim().length >= 5) {
+            const coords = getCoordinatesForPlace(pickup);
+            coordinates.push(coords);
+            const m = L.marker(coords, {
+                icon: L.divIcon({
+                    html: '<div class="flex items-center justify-center size-6 rounded-full bg-emerald-600 text-white font-bold border-2 border-white shadow-md text-xs">P</div>',
+                    className: 'custom-div-icon',
+                    iconSize: [24, 24]
+                })
+            }).addTo(map).bindPopup('<b>Pickup:</b> ' + pickup);
+            markers.push(m);
+        }
+
+        destinations.forEach((dest, index) => {
+            const coords = getCoordinatesForPlace(dest);
+            coordinates.push(coords);
+            const m = L.marker(coords, {
+                icon: L.divIcon({
+                    html: `<div class="flex items-center justify-center size-6 rounded-full bg-zinc-900 text-white font-bold border-2 border-white shadow-md text-xs">${index + 1}</div>`,
+                    className: 'custom-div-icon',
+                    iconSize: [24, 24]
+                })
+            }).addTo(map).bindPopup(`<b>Stop ${index + 1}:</b> ` + dest);
+            markers.push(m);
+        });
+
+        const dropoff = $wire.dropoffLocation;
+        if (dropoff && dropoff.trim().length > 0) {
+            const coords = getCoordinatesForPlace(dropoff);
+            coordinates.push(coords);
+            const m = L.marker(coords, {
+                icon: L.divIcon({
+                    html: '<div class="flex items-center justify-center size-6 rounded-full bg-red-650 text-white font-bold border-2 border-white shadow-md text-xs font-sans">D</div>',
+                    className: 'custom-div-icon',
+                    iconSize: [24, 24]
+                })
+            }).addTo(map).bindPopup('<b>Drop-off:</b> ' + dropoff);
+            markers.push(m);
+        }
+
+        if (coordinates.length > 1) {
+            routeLine = L.polyline(coordinates, { color: '#18181b', weight: 4, dashArray: '5, 10' }).addTo(map);
+            map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+        } else if (coordinates.length === 1) {
+            map.setView(coordinates[0], 12);
+        }
+    }
+
+    document.addEventListener('livewire:navigated', () => {
+        initMap();
+    });
+
+    $wire.$watch('customDestinations', () => {
+        updateRoute();
+    });
+    $wire.$watch('pickupLocation', () => {
+        updateRoute();
+    });
+    $wire.$watch('dropoffLocation', () => {
+        updateRoute();
+    });
+    $wire.$watch('selectedGuideId', () => {
+        setTimeout(initMap, 50);
+    });
+
+    setTimeout(initMap, 50);
+</script>
+@endscript
 </div>

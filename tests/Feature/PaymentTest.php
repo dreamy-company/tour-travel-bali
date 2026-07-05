@@ -17,6 +17,13 @@ class PaymentTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['services.midtrans.server_key' => 'SB-Mid-server-defaultkey']);
+    }
+
     /**
      * Test generating a secure checkout Snap token.
      */
