@@ -48,7 +48,7 @@ class DatabaseSeeder extends Seeder
         // 3. Create Super Admins
         $admin1 = User::create([
             'name' => 'Super Admin One',
-            'email' => 'admin1@example.com',
+            'email' => 'admin1@gmail.com',
             'password' => $hashedPassword,
             'phone_number' => '081111111111',
             'role' => UserRole::ADMIN,
@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
 
         $admin2 = User::create([
             'name' => 'Super Admin Two',
-            'email' => 'admin2@example.com',
+            'email' => 'admin2@gmail.com',
             'password' => $hashedPassword,
             'phone_number' => '082222222222',
             'role' => UserRole::ADMIN,
@@ -70,7 +70,7 @@ class DatabaseSeeder extends Seeder
         foreach ($customerNames as $index => $name) {
             $customers[] = User::create([
                 'name' => $name,
-                'email' => 'customer' . ($index + 1) . '@example.com',
+                'email' => 'customer' . ($index + 1) . '@gmail.com',
                 'password' => $hashedPassword,
                 'phone_number' => '08200000000' . ($index + 1),
                 'role' => UserRole::CUSTOMER,
@@ -84,7 +84,7 @@ class DatabaseSeeder extends Seeder
         // Guide 1: Wayan
         $wayanUser = User::create([
             'name' => 'Wayan Sudarta',
-            'email' => 'wayan@example.com',
+            'email' => 'wayan@gmail.com',
             'password' => $hashedPassword,
             'phone_number' => '081234567891',
             'role' => UserRole::GUIDE,
@@ -113,7 +113,7 @@ class DatabaseSeeder extends Seeder
         // Guide 2: Made
         $madeUser = User::create([
             'name' => 'Made Widiada',
-            'email' => 'made@example.com',
+            'email' => 'made@gmail.com',
             'password' => $hashedPassword,
             'phone_number' => '081234567892',
             'role' => UserRole::GUIDE,
@@ -142,7 +142,7 @@ class DatabaseSeeder extends Seeder
         // Guide 3: Nyoman
         $nyomanUser = User::create([
             'name' => 'Nyoman Sudiarta',
-            'email' => 'nyoman@example.com',
+            'email' => 'nyoman@gmail.com',
             'password' => $hashedPassword,
             'phone_number' => '081234567893',
             'role' => UserRole::GUIDE,
@@ -171,7 +171,7 @@ class DatabaseSeeder extends Seeder
         // Guide 4: Ketut
         $ketutUser = User::create([
             'name' => 'Ketut Astawa',
-            'email' => 'ketut@example.com',
+            'email' => 'ketut@gmail.com',
             'password' => $hashedPassword,
             'phone_number' => '081234567894',
             'role' => UserRole::GUIDE,
@@ -200,7 +200,7 @@ class DatabaseSeeder extends Seeder
         // Guide 5: Gede (Expired credentials - test suspend system)
         $gedeUser = User::create([
             'name' => 'Gede Budiasa',
-            'email' => 'gede@example.com',
+            'email' => 'gede@gmail.com',
             'password' => $hashedPassword,
             'phone_number' => '081234567895',
             'role' => UserRole::GUIDE,
