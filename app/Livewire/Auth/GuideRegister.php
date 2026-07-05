@@ -7,7 +7,6 @@ use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\GuideProfile;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -24,25 +23,23 @@ class GuideRegister extends Component
 
     public int $currentStep = 1;
 
-    // Step 1: Basic details
+    // Step 1: Account Creation
     public string $name = '';
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
     public string $phone_number = '';
 
-    // Step 2: Profile details
-    public string $bio = '';
-    public string $vehicle_details = '';
-    /** @var array<int, string> */
-    public array $languages = ['id', 'en'];
-    public string $tariff_mode = 'daily';
-    public string $base_rate = '';
+    // Step 2: Identity (Tier 1 KYC)
     public string $ktp_number = '';
+    public string $bio = '';
+    public array $languages = ['id', 'en'];
     /** @var mixed */
     public $ktp_photo;
+    /** @var mixed */
+    public $headshot;
 
-    // Step 3: Tourism legality
+    // Step 3: Legality (Tier 2 KYC)
     public string $ktpp_number = '';
     /** @var mixed */
     public $ktpp_file;
@@ -52,6 +49,8 @@ class GuideRegister extends Component
     public string $skck_expired_at = '';
     /** @var mixed */
     public $surat_sehat_file;
+
+    // Step 4: Digital SOP Agreement
     public bool $signed_sop = false;
 
     /**
@@ -69,14 +68,12 @@ class GuideRegister extends Component
                 'phone_number' => ['required', 'string', 'min:10', 'max:20'],
             ],
             2 => [
+                'ktp_number' => ['required', 'string', 'regex:/^\d{16}$/'],
                 'bio' => ['nullable', 'string', 'max:1000'],
-                'vehicle_details' => ['nullable', 'string', 'max:500'],
                 'languages' => ['required', 'array', 'min:1'],
                 'languages.*' => ['string', 'in:id,en,jp,fr,de'],
-                'tariff_mode' => ['required', 'string', 'in:package,hourly,daily'],
-                'base_rate' => ['required', 'numeric', 'min:0'],
-                'ktp_number' => ['required', 'string', 'regex:/^\d{16}$/'],
                 'ktp_photo' => ['required', 'image', 'max:2048'], // 2MB
+                'headshot' => ['required', 'image', 'max:2048'], // 2MB
             ],
             3 => [
                 'ktpp_number' => ['required', 'string', 'max:100'],
@@ -85,6 +82,8 @@ class GuideRegister extends Component
                 'skck_file' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // 5MB
                 'skck_expired_at' => ['required', 'date', 'after:today'],
                 'surat_sehat_file' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // 5MB
+            ],
+            4 => [
                 'signed_sop' => ['required', 'accepted'],
             ],
             default => [],
@@ -99,7 +98,8 @@ class GuideRegister extends Component
         $allRules = array_merge(
             $this->getRulesForStep(1),
             $this->getRulesForStep(2),
-            $this->getRulesForStep(3)
+            $this->getRulesForStep(3),
+            $this->getRulesForStep(4)
         );
 
         if (array_key_exists($propertyName, $allRules)) {
@@ -115,7 +115,7 @@ class GuideRegister extends Component
         $rules = $this->getRulesForStep($this->currentStep);
         $this->validate($rules);
 
-        if ($this->currentStep < 3) {
+        if ($this->currentStep < 4) {
             $this->currentStep++;
         }
     }
@@ -135,26 +135,33 @@ class GuideRegister extends Component
      */
     public function register(): void
     {
-        $rules = $this->getRulesForStep(3);
+        $rules = $this->getRulesForStep(4);
         $this->validate($rules);
 
         DB::transaction(function (): void {
-            // 1. Create User
+            // 1. Create User as pending_verification
             $user = User::create([
                 'name' => $this->name,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
                 'phone_number' => $this->phone_number,
                 'role' => UserRole::GUIDE,
-                'status' => UserStatus::ACTIVE,
+                'status' => UserStatus::PENDING_VERIFICATION,
             ]);
 
-            // 2. Store Files to Private storage (local disk)
+            // 2. Store Files to Private storage (local disk: maps to storage/app/private in Laravel 11+)
             /** @var \Illuminate\Http\UploadedFile $ktpPhotoFile */
             $ktpPhotoFile = $this->ktp_photo;
             $ktpPhotoPath = $ktpPhotoFile->store('guide_documents/ktp_photos', 'local');
             if ($ktpPhotoPath === false) {
                 throw new \RuntimeException('Failed to store KTP photo.');
+            }
+
+            /** @var \Illuminate\Http\UploadedFile $headshotFile */
+            $headshotFile = $this->headshot;
+            $headshotPath = $headshotFile->store('guide_documents/headshots', 'local');
+            if ($headshotPath === false) {
+                throw new \RuntimeException('Failed to store headshot.');
             }
 
             /** @var \Illuminate\Http\UploadedFile $ktppFileObj */
@@ -183,27 +190,24 @@ class GuideRegister extends Component
                 'user_id' => $user->id,
                 'ktp_number' => $this->ktp_number,
                 'ktp_photo' => $ktpPhotoPath,
+                'headshot' => $headshotPath,
                 'ktpp_number' => $this->ktpp_number,
                 'ktpp_file' => $ktppFilePath,
                 'ktpp_expired_at' => $this->ktpp_expired_at,
                 'skck_file' => $skckFilePath,
                 'skck_expired_at' => $this->skck_expired_at,
                 'surat_sehat_file' => $suratSehatFilePath,
-                'vehicle_details' => $this->vehicle_details ?: null,
                 'bio' => $this->bio ?: null,
                 'languages' => $this->languages,
-                'tariff_mode' => TariffMode::from($this->tariff_mode),
-                'base_rate' => (float) $this->base_rate,
+                'tariff_mode' => TariffMode::DAILY, // default
+                'base_rate' => 0.00,
                 'is_verified' => false,
                 'signed_sop_at' => now(),
             ]);
-
-            // 4. Authenticate user
-            Auth::login($user);
         });
 
-        // Redirect to dashboard
-        $this->redirect(route('dashboard'), navigate: true);
+        // Redirect to 'Under Review' landing page
+        $this->redirect(route('register.under-review'), navigate: true);
     }
 
     /**

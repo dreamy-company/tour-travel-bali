@@ -9,6 +9,7 @@ Route::get('/guides', \App\Livewire\Customer\GuideSearch::class)->name('guides.i
 
 Route::middleware('guest')->group(function () {
     Route::get('register/guide', GuideRegister::class)->name('register.guide');
+    Route::view('register/under-review', 'auth.under-review')->name('register.under-review');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

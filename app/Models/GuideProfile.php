@@ -35,6 +35,7 @@ use Illuminate\Support\Carbon;
     'user_id',
     'ktp_number',
     'ktp_photo',
+    'headshot',
     'ktpp_number',
     'ktpp_file',
     'ktpp_expired_at',
