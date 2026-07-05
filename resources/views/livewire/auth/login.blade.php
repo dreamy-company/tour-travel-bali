@@ -51,9 +51,19 @@
             </div>
         </form>
 
-        <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Don\'t have an account?') }}</span>
-            <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+        <div class="text-sm text-center text-zinc-600 dark:text-zinc-400 space-y-2 mt-4">
+            <div class="block">
+                {{ __("Don't have an account?") }}
+            </div>
+            <div class="flex items-center justify-center space-x-4 rtl:space-x-reverse">
+                <a href="{{ url('/register') }}" wire:navigate class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    {{ __('Sign up as Customer') }}
+                </a>
+                <span class="text-zinc-400">|</span>
+                <a href="{{ url('/register/guide') }}" wire:navigate class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    {{ __('Sign up as Tour Guide') }}
+                </a>
+            </div>
         </div>
     </div>
 </x-layouts::auth>
