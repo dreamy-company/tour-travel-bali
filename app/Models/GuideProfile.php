@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property float $base_rate
  * @property bool $is_verified
  * @property Carbon|null $signed_sop_at
+  * @property string|null $rejection_reason
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -47,6 +48,7 @@ use Illuminate\Support\Carbon;
     'base_rate',
     'is_verified',
     'signed_sop_at',
+    'rejection_reason',
 ])]
 class GuideProfile extends Model
 {
