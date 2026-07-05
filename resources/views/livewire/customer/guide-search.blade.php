@@ -1,6 +1,19 @@
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[calc(100vh-10rem)]">
-    <!-- LEFT PANEL: Search Filters (4 Cols) -->
-    <div class="lg:col-span-4 flex flex-col border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs gap-6 h-fit">
+<div>
+    <!-- Session Flash Messages -->
+    @if (session()->has('success'))
+        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-zinc-900 dark:text-green-400 border border-green-200 dark:border-green-800/30 flex items-center justify-between" role="alert">
+            <span class="font-medium">{{ session('success') }}</span>
+        </div>
+    @endif
+    @if (session()->has('error'))
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-zinc-900 dark:text-red-400 border border-red-200 dark:border-red-800/30 flex items-center justify-between" role="alert">
+            <span class="font-medium">{{ session('error') }}</span>
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[calc(100vh-10rem)]">
+        <!-- LEFT PANEL: Search Filters (4 Cols) -->
+        <div class="lg:col-span-4 flex flex-col border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs gap-6 h-fit">
         <div>
             <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">{{ __('Search Filters') }}</h3>
             <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Filter verified guides based on your travel needs.') }}</p>
@@ -378,4 +391,5 @@
             </div>
         @endif
     </div>
+</div>
 </div>

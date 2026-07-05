@@ -4,7 +4,6 @@ namespace App\Livewire\Guide;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -55,7 +54,7 @@ class OrderManagement extends Component
             ->find($bookingId);
 
         if (! $booking) {
-            Flux::toast(variant: 'danger', text: __('Booking not found.'));
+            session()->flash('error', __('Booking not found.'));
             return;
         }
 
@@ -63,7 +62,7 @@ class OrderManagement extends Component
             'status' => BookingStatus::CONFIRMED,
         ]);
 
-        Flux::toast(variant: 'success', text: __('Booking accepted! Customer has been notified.'));
+        session()->flash('success', __('Booking accepted! Customer has been notified.'));
     }
 
     /**
@@ -76,7 +75,7 @@ class OrderManagement extends Component
             ->find($bookingId);
 
         if (! $booking) {
-            Flux::toast(variant: 'danger', text: __('Booking not found.'));
+            session()->flash('error', __('Booking not found.'));
             return;
         }
 
@@ -84,7 +83,7 @@ class OrderManagement extends Component
             'status' => BookingStatus::REJECTED,
         ]);
 
-        Flux::toast(variant: 'warning', text: __('Booking request declined.'));
+        session()->flash('success', __('Booking request declined.'));
     }
 
     /**
@@ -95,7 +94,7 @@ class OrderManagement extends Component
         $booking = Booking::where('guide_id', Auth::id())->find($bookingId);
 
         if (! $booking) {
-            Flux::toast(variant: 'danger', text: __('Booking not found.'));
+            session()->flash('error', __('Booking not found.'));
             return;
         }
 
@@ -106,7 +105,7 @@ class OrderManagement extends Component
         ];
 
         if (! array_key_exists($nextState, $allowedStates)) {
-            Flux::toast(variant: 'danger', text: __('Invalid state transition.'));
+            session()->flash('error', __('Invalid state transition.'));
             return;
         }
 
@@ -120,11 +119,11 @@ class OrderManagement extends Component
                 $releaseService->release($booking);
             }
         } catch (\Exception $e) {
-            Flux::toast(variant: 'danger', text: __('Failed to update tour: :error', ['error' => $e->getMessage()]));
+            session()->flash('error', __('Failed to update tour: :error', ['error' => $e->getMessage()]));
             return;
         }
 
-        Flux::toast(variant: 'success', text: __('Tour status updated to: :status', [
+        session()->flash('success', __('Tour status updated to: :status', [
             'status' => ucfirst(str_replace('_', ' ', $nextState)),
         ]));
     }

@@ -9,7 +9,6 @@ use App\Enums\UserRole;
 use App\Models\Booking;
 use App\Models\EscrowTransaction;
 use App\Models\User;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -224,7 +223,7 @@ class GuideSearch extends Component
             ]);
         });
 
-        Flux::toast(variant: 'success', text: __('Booking request submitted successfully!'));
+        session()->flash('success', __('Booking request submitted successfully!'));
 
         $this->selectedGuideId = null;
         $this->redirect(route('dashboard'), navigate: true);

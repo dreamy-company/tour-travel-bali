@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use App\Enums\UserStatus;
 use App\Models\GuideProfile;
-use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -74,7 +73,7 @@ class DocumentVerification extends Component
         $profile = $this->selectedProfile();
 
         if (! $profile) {
-            Flux::toast(variant: 'danger', text: __('No guide selected.'));
+            session()->flash('error', __('No guide selected.'));
             return;
         }
 
@@ -91,7 +90,7 @@ class DocumentVerification extends Component
             ]);
         });
 
-        Flux::toast(variant: 'success', text: __('Guide approved successfully.'));
+        session()->flash('success', __('Guide approved successfully.'));
 
         // Select the next pending profile
         $this->selectedProfileId = null;
@@ -113,7 +112,7 @@ class DocumentVerification extends Component
         $profile = $this->selectedProfile();
 
         if (! $profile) {
-            Flux::toast(variant: 'danger', text: __('No guide selected.'));
+            session()->flash('error', __('No guide selected.'));
             return;
         }
 
@@ -130,7 +129,7 @@ class DocumentVerification extends Component
             ]);
         });
 
-        Flux::toast(variant: 'warning', text: __('Guide verification rejected. Feedback saved.'));
+        session()->flash('success', __('Guide verification rejected. Feedback saved.'));
 
         // Reset inputs and select next profile
         $this->rejectionReason = '';

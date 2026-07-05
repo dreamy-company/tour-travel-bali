@@ -5,7 +5,6 @@ namespace App\Livewire\Guide;
 use App\Enums\TariffMode;
 use App\Models\GuideProfile;
 use App\Models\TourPackage;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -80,7 +79,7 @@ class ServiceManagement extends Component
     public function updateRates(): void
     {
         if (! $this->isVerified()) {
-            Flux::toast(variant: 'danger', text: __('Your profile is pending verification.'));
+            session()->flash('error', __('Your profile is pending verification.'));
             return;
         }
 
@@ -95,7 +94,7 @@ class ServiceManagement extends Component
                 'tariff_mode' => TariffMode::from($this->tariffMode),
                 'base_rate' => (float) $this->baseRate,
             ]);
-            Flux::toast(variant: 'success', text: __('Pricing rates updated successfully.'));
+            session()->flash('success', __('Pricing rates updated successfully.'));
         }
     }
 
@@ -105,7 +104,7 @@ class ServiceManagement extends Component
     public function createPackage(): void
     {
         if (! $this->isVerified()) {
-            Flux::toast(variant: 'danger', text: __('Your profile is pending verification.'));
+            session()->flash('error', __('Your profile is pending verification.'));
             return;
         }
 
@@ -119,14 +118,14 @@ class ServiceManagement extends Component
     public function editPackage(int $id): void
     {
         if (! $this->isVerified()) {
-            Flux::toast(variant: 'danger', text: __('Your profile is pending verification.'));
+            session()->flash('error', __('Your profile is pending verification.'));
             return;
         }
 
         $package = TourPackage::where('guide_id', Auth::id())->find($id);
 
         if (! $package) {
-            Flux::toast(variant: 'danger', text: __('Package not found.'));
+            session()->flash('error', __('Package not found.'));
             return;
         }
 
@@ -164,13 +163,10 @@ class ServiceManagement extends Component
         }
     }
 
-    /**
-     * Save/Update tour package.
-     */
     public function savePackage(): void
     {
         if (! $this->isVerified()) {
-            Flux::toast(variant: 'danger', text: __('Your profile is pending verification.'));
+            session()->flash('error', __('Your profile is pending verification.'));
             return;
         }
 
@@ -193,7 +189,7 @@ class ServiceManagement extends Component
                     'destinations' => $this->destinations,
                     'is_active' => $this->is_active,
                 ]);
-                Flux::toast(variant: 'success', text: __('Tour package updated successfully.'));
+                session()->flash('success', __('Tour package updated successfully.'));
             }
         } else {
             TourPackage::create([
@@ -204,7 +200,7 @@ class ServiceManagement extends Component
                 'destinations' => $this->destinations,
                 'is_active' => $this->is_active,
             ]);
-            Flux::toast(variant: 'success', text: __('Tour package created successfully.'));
+            session()->flash('success', __('Tour package created successfully.'));
         }
 
         $this->resetPackageForm();
@@ -217,7 +213,7 @@ class ServiceManagement extends Component
     public function deletePackage(int $id): void
     {
         if (! $this->isVerified()) {
-            Flux::toast(variant: 'danger', text: __('Your profile is pending verification.'));
+            session()->flash('error', __('Your profile is pending verification.'));
             return;
         }
 
@@ -225,7 +221,7 @@ class ServiceManagement extends Component
 
         if ($package) {
             $package->delete();
-            Flux::toast(variant: 'success', text: __('Tour package deleted.'));
+            session()->flash('success', __('Tour package deleted.'));
         }
     }
 

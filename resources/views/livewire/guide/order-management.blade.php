@@ -1,4 +1,16 @@
 <div class="space-y-6">
+    <!-- Session Flash Messages -->
+    @if (session()->has('success'))
+        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-zinc-900 dark:text-green-400 border border-green-200 dark:border-green-800/30 flex items-center justify-between" role="alert">
+            <span class="font-medium">{{ session('success') }}</span>
+        </div>
+    @endif
+    @if (session()->has('error'))
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-zinc-900 dark:text-red-400 border border-red-200 dark:border-red-800/30 flex items-center justify-between" role="alert">
+            <span class="font-medium">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <!-- Header -->
     <div class="border-b border-zinc-200 dark:border-zinc-800 pb-4">
         <h2 class="text-xl font-bold text-zinc-950 dark:text-white">{{ __('Tour Orders & Management') }}</h2>

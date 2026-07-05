@@ -1,6 +1,19 @@
-<div x-data="{ showRejectModal: false }" class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[calc(100vh-10rem)]">
-    <!-- LEFT COLUMN: Pending Guides List (Master Pane) -->
-    <div class="lg:col-span-4 flex flex-col border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-4 shadow-xs">
+<div x-data="{ showRejectModal: false }" class="space-y-4 w-full">
+    <!-- Session Flash Messages -->
+    @if (session()->has('success'))
+        <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-zinc-900 dark:text-green-400 border border-green-200 dark:border-green-800/30 flex items-center justify-between" role="alert">
+            <span class="font-medium">{{ session('success') }}</span>
+        </div>
+    @endif
+    @if (session()->has('error'))
+        <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-zinc-900 dark:text-red-400 border border-red-200 dark:border-red-800/30 flex items-center justify-between" role="alert">
+            <span class="font-medium">{{ session('error') }}</span>
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[calc(100vh-10rem)]">
+        <!-- LEFT COLUMN: Pending Guides List (Master Pane) -->
+        <div class="lg:col-span-4 flex flex-col border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-4 shadow-xs">
         <div class="mb-4">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">{{ __('Pending Verifications') }}</h3>
@@ -307,4 +320,5 @@
             </div>
         @endif
     </div>
+</div>
 </div>
