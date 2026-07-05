@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $tour_package_id
  * @property string $pickup_location
  * @property string|null $dropoff_location
- * @property array|null $custom_destinations
+ * @property array<int, string>|null $custom_destinations
  * @property Carbon $schedule_date
  * @property string $pickup_time
  * @property float $total_price
@@ -40,6 +40,7 @@ use Illuminate\Support\Carbon;
 ])]
 class Booking extends Model
 {
+    /** @use HasFactory<\Database\Factories\BookingFactory> */
     use HasFactory;
 
     /**
@@ -59,6 +60,8 @@ class Booking extends Model
 
     /**
      * Get the customer (user) associated with the booking.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function customer(): BelongsTo
     {
@@ -67,6 +70,8 @@ class Booking extends Model
 
     /**
      * Get the guide (user) associated with the booking.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function guide(): BelongsTo
     {
@@ -75,6 +80,8 @@ class Booking extends Model
 
     /**
      * Get the tour package associated with the booking.
+     *
+     * @return BelongsTo<TourPackage, $this>
      */
     public function tourPackage(): BelongsTo
     {
@@ -83,6 +90,8 @@ class Booking extends Model
 
     /**
      * Get the escrow transaction associated with the booking.
+     *
+     * @return HasOne<EscrowTransaction, $this>
      */
     public function escrowTransaction(): HasOne
     {
@@ -91,6 +100,8 @@ class Booking extends Model
 
     /**
      * Get the review associated with the booking.
+     *
+     * @return HasOne<Review, $this>
      */
     public function review(): HasOne
     {
@@ -99,6 +110,8 @@ class Booking extends Model
 
     /**
      * Get the chat messages for the booking.
+     *
+     * @return HasMany<ChatMessage, $this>
      */
     public function chatMessages(): HasMany
     {

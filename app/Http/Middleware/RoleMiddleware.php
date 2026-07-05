@@ -20,7 +20,7 @@ class RoleMiddleware
         }
 
         // The user's role is cast to the UserRole backed enum, so we check its value.
-        $userRole = $request->user()->role?->value;
+        $userRole = $request->user()->role->value;
 
         if (! in_array($userRole, $roles, true)) {
             abort(403, 'Unauthorized action.');

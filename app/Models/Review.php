@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
 ])]
 class Review extends Model
 {
+    /** @use HasFactory<\Database\Factories\ReviewFactory> */
     use HasFactory;
 
     /**
@@ -43,6 +44,8 @@ class Review extends Model
 
     /**
      * Get the booking associated with the review.
+     *
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {
@@ -51,6 +54,8 @@ class Review extends Model
 
     /**
      * Get the customer (user) who wrote the review.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function customer(): BelongsTo
     {
@@ -59,6 +64,8 @@ class Review extends Model
 
     /**
      * Get the guide (user) reviewed.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function guide(): BelongsTo
     {

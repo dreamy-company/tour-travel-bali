@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
  * @property string $title
  * @property string $description
  * @property float $price
- * @property array $destinations
+ * @property array<int, string> $destinations
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 ])]
 class TourPackage extends Model
 {
+    /** @use HasFactory<\Database\Factories\TourPackageFactory> */
     use HasFactory;
 
     /**
@@ -48,6 +49,8 @@ class TourPackage extends Model
 
     /**
      * Get the guide (user) that owns the tour package.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function guide(): BelongsTo
     {
@@ -56,6 +59,8 @@ class TourPackage extends Model
 
     /**
      * Get the bookings that use this tour package.
+     *
+     * @return HasMany<Booking, $this>
      */
     public function bookings(): HasMany
     {

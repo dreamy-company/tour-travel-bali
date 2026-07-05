@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 ])]
 class Withdrawal extends Model
 {
+    /** @use HasFactory<\Database\Factories\WithdrawalFactory> */
     use HasFactory;
 
     /**
@@ -47,6 +48,8 @@ class Withdrawal extends Model
 
     /**
      * Get the guide (user) that made the withdrawal.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function guide(): BelongsTo
     {

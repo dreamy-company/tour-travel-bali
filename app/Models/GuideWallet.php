@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
 ])]
 class GuideWallet extends Model
 {
+    /** @use HasFactory<\Database\Factories\GuideWalletFactory> */
     use HasFactory;
 
     /**
@@ -37,6 +38,8 @@ class GuideWallet extends Model
 
     /**
      * Get the guide (user) that owns the wallet.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function guide(): BelongsTo
     {

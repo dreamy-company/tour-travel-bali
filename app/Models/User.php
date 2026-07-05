@@ -71,6 +71,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the guide profile associated with the user.
+     *
+     * @return HasOne<GuideProfile, $this>
      */
     public function guideProfile(): HasOne
     {
@@ -79,6 +81,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the tour packages created by the user (as a guide).
+     *
+     * @return HasMany<TourPackage, $this>
      */
     public function tourPackages(): HasMany
     {
@@ -87,6 +91,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the bookings made by the user (as a customer).
+     *
+     * @return HasMany<Booking, $this>
      */
     public function customerBookings(): HasMany
     {
@@ -95,6 +101,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the bookings assigned to the user (as a guide).
+     *
+     * @return HasMany<Booking, $this>
      */
     public function guideBookings(): HasMany
     {
@@ -103,6 +111,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the wallet associated with the user (as a guide).
+     *
+     * @return HasOne<GuideWallet, $this>
      */
     public function guideWallet(): HasOne
     {
@@ -111,6 +121,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the withdrawals requested by the user (as a guide).
+     *
+     * @return HasMany<Withdrawal, $this>
      */
     public function withdrawals(): HasMany
     {
@@ -119,6 +131,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the reviews written by the user (as a customer).
+     *
+     * @return HasMany<Review, $this>
      */
     public function customerReviews(): HasMany
     {
@@ -127,6 +141,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the reviews received by the user (as a guide).
+     *
+     * @return HasMany<Review, $this>
      */
     public function guideReviews(): HasMany
     {
@@ -135,6 +151,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the chat messages sent by the user.
+     *
+     * @return HasMany<ChatMessage, $this>
      */
     public function chatMessages(): HasMany
     {

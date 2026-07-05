@@ -22,7 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string $surat_sehat_file
  * @property string|null $vehicle_details
  * @property string|null $bio
- * @property array $languages
+ * @property array<int, string> $languages
  * @property TariffMode $tariff_mode
  * @property float $base_rate
  * @property bool $is_verified
@@ -50,6 +50,7 @@ use Illuminate\Support\Carbon;
 ])]
 class GuideProfile extends Model
 {
+    /** @use HasFactory<\Database\Factories\GuideProfileFactory> */
     use HasFactory;
 
     /**
@@ -72,6 +73,8 @@ class GuideProfile extends Model
 
     /**
      * Get the user that owns the guide profile.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

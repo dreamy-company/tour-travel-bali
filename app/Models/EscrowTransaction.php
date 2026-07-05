@@ -33,6 +33,7 @@ use Illuminate\Support\Carbon;
 ])]
 class EscrowTransaction extends Model
 {
+    /** @use HasFactory<\Database\Factories\EscrowTransactionFactory> */
     use HasFactory;
 
     /**
@@ -53,6 +54,8 @@ class EscrowTransaction extends Model
 
     /**
      * Get the booking associated with the escrow transaction.
+     *
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {

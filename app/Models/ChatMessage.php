@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
 ])]
 class ChatMessage extends Model
 {
+    /** @use HasFactory<\Database\Factories\ChatMessageFactory> */
     use HasFactory;
 
     /**
@@ -41,6 +42,8 @@ class ChatMessage extends Model
 
     /**
      * Get the booking associated with the chat message.
+     *
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {
@@ -49,6 +52,8 @@ class ChatMessage extends Model
 
     /**
      * Get the sender (user) of the chat message.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function sender(): BelongsTo
     {
