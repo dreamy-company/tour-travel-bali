@@ -49,6 +49,7 @@ use Illuminate\Support\Carbon;
     'is_verified',
     'signed_sop_at',
     'rejection_reason',
+    'strikes',
 ])]
 class GuideProfile extends Model
 {

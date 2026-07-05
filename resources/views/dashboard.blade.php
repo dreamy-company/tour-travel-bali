@@ -22,40 +22,7 @@
 
         <!-- 1. ADMIN DASHBOARD VIEW -->
         @if (auth()->user()->role === \App\Enums\UserRole::ADMIN)
-            @php
-                $pendingCount = \App\Models\GuideProfile::where('is_verified', false)->count();
-            @endphp
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Metrics Card -->
-                <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs flex flex-col justify-between">
-                    <div>
-                        <span class="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">{{ __('Onboarding Status') }}</span>
-                        <h3 class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-1">
-                            {{ $pendingCount }}
-                        </h3>
-                        <p class="text-xs text-zinc-500 mt-1">{{ __('Tour guides waiting for manual compliance audit.') }}</p>
-                    </div>
-                </div>
-
-                <!-- Action Card -->
-                <div class="md:col-span-2 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs flex flex-col justify-between gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">{{ __('Guide Document Verification') }}</h3>
-                        <p class="text-xs text-zinc-500 mt-1 leading-relaxed">
-                            Vet applicant tour guide compliance uploads (KTP photos, KTPP official licenses, and police check SKCK certificates) to grant verified marketplace access.
-                        </p>
-                    </div>
-                    <div class="flex justify-end">
-                        <a 
-                            href="{{ route('admin.verification') }}" 
-                            class="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 transition-colors shadow-xs"
-                        >
-                            {{ __('Open Verification Dashboard') }}
-                            <svg class="size-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            @livewire('admin.admin-dashboard')
 
         <!-- 2. TOUR GUIDE DASHBOARD VIEW -->
         @elseif (auth()->user()->role === \App\Enums\UserRole::GUIDE)
