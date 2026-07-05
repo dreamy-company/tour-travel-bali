@@ -4,8 +4,8 @@ namespace App\Livewire\Chat;
 
 use App\Models\Booking;
 use App\Models\ChatMessage;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class ChatRoom extends Component
@@ -19,7 +19,7 @@ class ChatRoom extends Component
     public function mount(int $bookingId): void
     {
         $booking = Booking::find($bookingId);
-        
+
         if (! $booking) {
             abort(404, 'Booking not found.');
         }
@@ -32,21 +32,13 @@ class ChatRoom extends Component
     }
 
     /**
-     * Get the active booking.
-     */
-    #[Computed]
-    public function booking(): ?Booking
-    {
-        return Booking::with(['customer', 'guide'])->find($this->bookingId);
-    }
-
-    /**
-     * Get chat messages in chronological order.
+     * Fetch chat messages in chronological order.
+     * Kept as a private method so Livewire never serializes or validates
+     * the Eloquent Collection as a tracked public property.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, ChatMessage>
+     * @return Collection<int, ChatMessage>
      */
-    #[Computed]
-    public function messages()
+    private function fetchMessages(): Collection
     {
         return ChatMessage::with('sender')
             ->where('booking_id', $this->bookingId)
@@ -59,6 +51,7 @@ class ChatRoom extends Component
      */
     public function sendMessage(): void
     {
+        // Only validate the scalar newMessage string — no Collection in scope.
         $this->validate([
             'newMessage' => ['required', 'string', 'max:1000'],
         ]);
@@ -71,15 +64,19 @@ class ChatRoom extends Component
 
         $this->newMessage = '';
 
-        // Dispatches event to trigger Alpine scroll
+        // Dispatches event to trigger Alpine auto-scroll
         $this->dispatch('chat-message-sent');
     }
 
     /**
      * Render the component view.
+     * Messages are passed directly here — the Eloquent Collection never
+     * touches Livewire's property tracking or validation pipeline.
      */
     public function render(): \Illuminate\Contracts\View\View
     {
-        return view('livewire.chat.chat-room');
+        return view('livewire.chat.chat-room', [
+            'messages' => $this->fetchMessages(),
+        ]);
     }
 }

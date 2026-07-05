@@ -25,10 +25,10 @@
     <!-- Messages Container with Polling -->
     <div 
         x-ref="messageContainer"
-        wire:poll.3s
+        wire:poll.3s="$refresh"
         class="h-64 overflow-y-auto space-y-2 pr-1 scroll-smooth"
     >
-        @forelse ($this->messages as $msg)
+        @forelse ($messages as $msg)
             @php
                 $isMe = $msg->sender_id === auth()->id();
             @endphp
