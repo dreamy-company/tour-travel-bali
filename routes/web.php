@@ -4,6 +4,7 @@ use App\Livewire\Auth\GuideRegister;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
+Route::get('/guides', \App\Livewire\Customer\GuideSearch::class)->name('guides.index');
 
 Route::middleware('guest')->group(function () {
     Route::get('register/guide', GuideRegister::class)->name('register.guide');

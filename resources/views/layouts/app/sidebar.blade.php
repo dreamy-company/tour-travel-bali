@@ -16,6 +16,10 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
 
+                    <flux:sidebar.item icon="magnifying-glass" :href="route('guides.index')" :current="request()->routeIs('guides.index')" wire:navigate>
+                        {{ __('Search Guides') }}
+                    </flux:sidebar.item>
+
                     @if (auth()->user()?->role === \App\Enums\UserRole::ADMIN)
                         <flux:sidebar.item icon="shield-check" :href="route('admin.verification')" :current="request()->routeIs('admin.verification')" wire:navigate>
                             {{ __('Guide Verification') }}
