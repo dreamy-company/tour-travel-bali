@@ -9,6 +9,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -28,6 +29,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string|null $phone_number
  * @property UserRole $role
  * @property UserStatus $status
+ * @property array<int, string>|null $traveler_preferences
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
@@ -35,7 +37,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'phone_number', 'role', 'status'])]
+#[Fillable(['name', 'email', 'password', 'phone_number', 'role', 'status', 'traveler_preferences'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -54,6 +56,7 @@ class User extends Authenticatable implements PasskeyUser
             'password' => 'hashed',
             'role' => UserRole::class,
             'status' => UserStatus::class,
+            'traveler_preferences' => 'array',
         ];
     }
 
@@ -157,5 +160,25 @@ class User extends Authenticatable implements PasskeyUser
     public function chatMessages(): HasMany
     {
         return $this->hasMany(ChatMessage::class, 'sender_id');
+    }
+
+    /**
+     * Get the favorite (wishlist) entries created by the user.
+     *
+     * @return HasMany<Favorite, $this>
+     */
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class, 'customer_id');
+    }
+
+    /**
+     * Get the guides saved by the user (wishlist).
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function favoritedGuides(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'customer_id', 'guide_id');
     }
 }

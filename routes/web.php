@@ -1,14 +1,11 @@
 <?php
 
 use App\Livewire\Auth\GuideRegister;
+use App\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 
-Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-})->name('home');
+Route::get('/', \App\Livewire\Landing::class)->name('home');
 
 Route::get('/guides', \App\Livewire\Customer\GuideSearch::class)->name('guides.index');
 Route::get('/guides/{guideProfile}', \App\Livewire\Customer\GuideShow::class)->name('guides.show');
@@ -21,10 +18,21 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    // Customer trips hub — customers are redirected here from /dashboard.
+    Route::get('/my-bookings', \App\Livewire\Customer\CustomerTrips::class)->name('customer.trips');
+    Route::get('/favorites', \App\Livewire\Customer\Wishlist::class)->name('favorites');
+    Route::get('/profile', \App\Livewire\Customer\ProfileSettings::class)->name('customer.profile');
+
     Route::get('/bookings/{booking?}', \App\Livewire\Customer\BookingTracker::class)->name('bookings.tracker');
     Route::post('/bookings/{booking}/checkout', [PaymentController::class, 'checkout'])->name('bookings.checkout');
     Route::get('/chat/{receiver}', \App\Livewire\Chat\ChatRoom::class)->name('chat.room');
+
+    // Role-aware dashboard shell: customers land on the trips hub.
+    Route::get('/dashboard', function () {
+        return auth()->user()->role === UserRole::CUSTOMER
+            ? redirect()->route('customer.trips')
+            : view('dashboard');
+    })->name('dashboard');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

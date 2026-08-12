@@ -101,8 +101,5 @@
                 </div>
             </div>
 
-        <!-- 3. CUSTOMER DASHBOARD VIEW -->
-        @else
-            @livewire('customer.customer-dashboard')
         @endif
     </div>

@@ -160,6 +160,17 @@
                             <svg class="size-3.5 fill-current text-rausch mr-1" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd"/></svg>
                             {{ __('HPI Verified') }}
                         </div>
+
+                        {{-- Wishlist heart toggle --}}
+                        <button
+                            type="button"
+                            wire:click="toggleFavorite({{ $guide->id }})"
+                            wire:key="fav-{{ $guide->id }}"
+                            aria-label="{{ __('Save to favorites') }}"
+                            class="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-white/95 shadow-airbnb transition-transform hover:scale-110 {{ in_array($guide->id, $favoriteGuideIds, true) ? 'text-rausch' : 'text-ink' }}"
+                        >
+                            <svg class="size-4 {{ in_array($guide->id, $favoriteGuideIds, true) ? 'fill-current' : 'fill-none stroke-current' }}" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+                        </button>
                     </a>
 
                     {{-- Meta --}}

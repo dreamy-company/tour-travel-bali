@@ -67,6 +67,13 @@ class DatabaseSeeder extends Seeder
         // 4. Create Customers
         $customers = [];
         $customerNames = ['John Doe', 'Jane Smith', 'Alice Johnson', 'Bob Brown', 'Charlie Green'];
+        $personas = [
+            ['cafe_hopper', 'photography_enthusiast'],
+            ['introvert', 'wellness_seeker'],
+            ['adventurer', 'nature', 'foodie'],
+            ['night_owl', 'culture_lover'],
+            ['foodie', 'wellness_seeker'],
+        ];
         foreach ($customerNames as $index => $name) {
             $customers[] = User::create([
                 'name' => $name,
@@ -75,6 +82,7 @@ class DatabaseSeeder extends Seeder
                 'phone_number' => '08200000000' . ($index + 1),
                 'role' => UserRole::CUSTOMER,
                 'status' => UserStatus::ACTIVE,
+                'traveler_preferences' => $personas[$index],
             ]);
         }
 

@@ -29,16 +29,16 @@
 
                 {{-- Center nav links --}}
                 <nav class="hidden md:flex items-center gap-1">
-                    <a href="{{ route('dashboard') }}" wire:navigate class="px-4 py-2 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 rounded-full transition-colors {{ request()->routeIs('dashboard') ? 'text-ink dark:text-white' : 'text-muted dark:text-zinc-400' }}">
-                        {{ __('Dashboard') }}
+                    <a href="{{ route('customer.trips') }}" wire:navigate class="px-4 py-2 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 rounded-full transition-colors {{ request()->routeIs('customer.trips') ? 'text-ink dark:text-white' : 'text-muted dark:text-zinc-400' }}">
+                        {{ __('My Trips') }}
                     </a>
                     <a href="{{ route('guides.index') }}" wire:navigate class="px-4 py-2 text-sm font-semibold hover:bg-surface-soft dark:hover:bg-zinc-800 rounded-full transition-colors {{ request()->routeIs('guides.index') ? 'text-ink dark:text-white' : 'text-muted dark:text-zinc-400' }}">
                         {{ __('Search Guides') }}
                     </a>
                     @auth
                         @if (auth()->user()->role === \App\Enums\UserRole::CUSTOMER || auth()->user()->role === \App\Enums\UserRole::GUIDE)
-                            <a href="{{ route('dashboard') }}" wire:navigate class="px-4 py-2 text-sm font-semibold hover:bg-surface-soft dark:hover:bg-zinc-800 rounded-full transition-colors text-muted dark:text-zinc-400 {{ request()->routeIs('chat.*') ? 'text-ink dark:text-white' : '' }}">
-                                {{ __('Messages') }}
+                            <a href="{{ route('favorites') }}" wire:navigate class="px-4 py-2 text-sm font-semibold hover:bg-surface-soft dark:hover:bg-zinc-800 rounded-full transition-colors text-muted dark:text-zinc-400 {{ request()->routeIs('favorites') ? 'text-ink dark:text-white' : '' }}">
+                                {{ __('Favorites') }}
                             </a>
                         @endif
                     @endauth
@@ -60,8 +60,8 @@
                                     <p class="text-sm font-semibold text-ink dark:text-white truncate">{{ auth()->user()->name }}</p>
                                     <p class="text-xs text-muted truncate">{{ auth()->user()->email }}</p>
                                 </div>
-                                <a href="{{ route('profile.edit') }}" wire:navigate class="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
-                                    {{ __('Settings') }}
+                                <a href="{{ route('customer.profile') }}" wire:navigate class="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
+                                    {{ __('Profile & Preferences') }}
                                 </a>
                                 <form method="POST" action="{{ route('logout') }}" class="mt-1">
                                     @csrf
@@ -108,12 +108,20 @@
                         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <a href="{{ route('dashboard') }}" wire:navigate @click="$store.customerNav.close()" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
-                    {{ __('Dashboard') }}
+                <a href="{{ route('customer.trips') }}" wire:navigate @click="$store.customerNav.close()" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
+                    {{ __('My Trips') }}
                 </a>
                 <a href="{{ route('guides.index') }}" wire:navigate @click="$store.customerNav.close()" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
                     {{ __('Search Guides') }}
                 </a>
+                @auth
+                    <a href="{{ route('favorites') }}" wire:navigate @click="$store.customerNav.close()" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
+                        {{ __('Favorites') }}
+                    </a>
+                    <a href="{{ route('customer.profile') }}" wire:navigate @click="$store.customerNav.close()" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
+                        {{ __('Profile & Preferences') }}
+                    </a>
+                @endauth
                 @guest
                     <a href="{{ route('login') }}" wire:navigate @click="$store.customerNav.close()" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-ink dark:text-zinc-200 hover:bg-surface-soft dark:hover:bg-zinc-800 transition-colors">
                         {{ __('Log in') }}

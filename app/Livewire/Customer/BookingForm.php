@@ -200,12 +200,12 @@ class BookingForm extends Component
                 ])
             );
 
-            $this->redirect(route('dashboard'), navigate: true);
+            $this->redirect(route('customer.trips'), navigate: true);
         } catch (\Exception $e) {
             logger()->error('Booking creation failed: ' . $e->getMessage());
 
             session()->flash('error', __('Booking request could not be processed. Please try again.'));
-            $this->redirect(route('dashboard'), navigate: true);
+            $this->redirect(route('customer.trips'), navigate: true);
         }
     }
 

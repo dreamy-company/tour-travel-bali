@@ -168,7 +168,7 @@ class CustomerFlowTest extends TestCase
             ->set('scheduleDate', now()->addDays(2)->toDateString())
             ->set('pickupTime', '08:00')
             ->call('submitBooking')
-            ->assertRedirect(route('dashboard'));
+            ->assertRedirect(route('customer.trips'));
 
         $booking = Booking::first();
         $this->assertNotNull($booking);
