@@ -111,4 +111,18 @@ class PreBookingChatTest extends TestCase
             ->test(ChatRoom::class, ['receiver' => $unverified])
             ->assertStatus(403);
     }
+
+    /**
+     * The standalone chat page renders inside the customer top-navbar layout.
+     */
+    public function test_chat_page_uses_customer_navbar_layout(): void
+    {
+        [$customer, $guide] = $this->makeCustomerAndGuide();
+
+        $this->actingAs($customer)
+            ->get(route('chat.room', ['receiver' => $guide->id]))
+            ->assertOk()
+            ->assertSee('BaliGuide')
+            ->assertDontSee('flux-sidebar');
+    }
 }

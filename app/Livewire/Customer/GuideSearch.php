@@ -16,7 +16,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.customer')]
 #[Title('Search Tour Guides')]
 class GuideSearch extends Component
 {

@@ -148,9 +148,13 @@ class ChatRoom extends Component
      */
     public function render(): \Illuminate\Contracts\View\View
     {
+        // Standalone chat page: customers get the top-navbar layout,
+        // guides keep the sidebar app layout. Embedded usage ignores layouts.
+        $layout = Auth::user()?->role === UserRole::CUSTOMER ? 'layouts.customer' : 'layouts.app';
+
         return view('livewire.chat.chat-room', [
             'messages' => $this->fetchMessages(),
             'receiver' => $this->receiver(),
-        ]);
+        ])->layout($layout);
     }
 }
