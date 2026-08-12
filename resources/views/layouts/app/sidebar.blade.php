@@ -63,7 +63,18 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            @auth
+                <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            @else
+                <div class="hidden lg:flex items-center gap-2 p-3">
+                    <a href="{{ route('login') }}" wire:navigate class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full text-ink hover:bg-surface-soft dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors">
+                        {{ __('Log in') }}
+                    </a>
+                    <a href="{{ route('register') }}" wire:navigate class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-rausch text-white hover:bg-rausch-active transition-colors">
+                        {{ __('Sign up') }}
+                    </a>
+                </div>
+            @endauth
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
@@ -72,6 +83,7 @@
 
             <flux:spacer />
 
+            @auth
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     :initials="auth()->user()->initials()"
@@ -119,6 +131,11 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+            @else
+                <a href="{{ route('login') }}" wire:navigate class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-rausch text-white hover:bg-rausch-active transition-colors">
+                    {{ __('Log in') }}
+                </a>
+            @endauth
         </flux:header>
 
         {{ $slot }}
