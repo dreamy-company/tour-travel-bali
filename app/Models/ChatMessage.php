@@ -10,8 +10,9 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $booking_id
+ * @property int|null $booking_id
  * @property int $sender_id
+ * @property int|null $receiver_id
  * @property string $message
  * @property bool $is_read
  * @property Carbon|null $created_at
@@ -20,6 +21,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'booking_id',
     'sender_id',
+    'receiver_id',
     'message',
     'is_read',
 ])]
@@ -58,5 +60,15 @@ class ChatMessage extends Model
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    /**
+     * Get the receiver (user) of the chat message.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function receiver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'receiver_id');
     }
 }

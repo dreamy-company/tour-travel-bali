@@ -27,6 +27,9 @@ class GuideSearch extends Component
     public string $minRating = '';
     /** @var array<int, string> */
     public array $selectedLanguages = [];
+    /** @var array<int, string> */
+    public array $selectedSpecializations = [];
+    public string $communicationStyle = '';
 
     // Booking / Itinerary Form State
     public ?int $selectedGuideId = null;
@@ -80,6 +83,20 @@ class GuideSearch extends Component
                         }
                     });
                 }
+
+                // FR-02-01: Filter by activity specializations (same interest)
+                if (! empty($this->selectedSpecializations)) {
+                    $query->where(function ($sub) {
+                        foreach ($this->selectedSpecializations as $spec) {
+                            $sub->orWhereJsonContains('specializations', $spec);
+                        }
+                    });
+                }
+
+                // FR-02-01: Filter by communication style (same vibe)
+                if ($this->communicationStyle !== '') {
+                    $query->where('communication_style', $this->communicationStyle);
+                }
             })
             ->with('guideProfile')
             ->withAvg('guideReviews', 'rating')
@@ -91,6 +108,15 @@ class GuideSearch extends Component
             })
             ->latest()
             ->get();
+    }
+
+    /**
+     * Get the currently authenticated user, if any (for pre-booking chat links).
+     */
+    #[Computed]
+    public function currentUser(): ?User
+    {
+        return Auth::user();
     }
 
     /**

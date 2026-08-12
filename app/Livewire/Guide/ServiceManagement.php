@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Guide;
 
+use App\Enums\CommunicationStyle;
+use App\Enums\Specialization;
 use App\Enums\TariffMode;
 use App\Models\GuideProfile;
 use App\Models\TourPackage;
@@ -18,6 +20,11 @@ class ServiceManagement extends Component
     // Rates configuration
     public string $tariffMode = 'daily';
     public string $baseRate = '';
+
+    // Persona & Matching profile (FR-02-01)
+    public string $communicationStyle = '';
+    /** @var array<int, string> */
+    public array $specializations = [];
 
     // Tour Package CRUD Form state
     public bool $isEditing = false;
@@ -39,6 +46,8 @@ class ServiceManagement extends Component
         if ($profile) {
             $this->tariffMode = $profile->tariff_mode->value === 'package' ? 'daily' : $profile->tariff_mode->value;
             $this->baseRate = (string) $profile->base_rate;
+            $this->communicationStyle = $profile->communication_style?->value ?? '';
+            $this->specializations = $profile->specializations ?? [];
         }
     }
 
@@ -71,6 +80,32 @@ class ServiceManagement extends Component
         return TourPackage::where('guide_id', Auth::id())
             ->latest()
             ->get();
+    }
+
+    /**
+     * Update the guide's matching persona (communication style + specializations).
+     */
+    public function updatePersona(): void
+    {
+        if (! $this->isVerified()) {
+            session()->flash('error', __('Your profile is pending verification.'));
+            return;
+        }
+
+        $this->validate([
+            'communicationStyle' => ['required', 'string', 'in:' . implode(',', array_column(CommunicationStyle::cases(), 'value'))],
+            'specializations' => ['required', 'array', 'min:1'],
+            'specializations.*' => ['string', 'in:' . implode(',', array_column(Specialization::cases(), 'value'))],
+        ]);
+
+        $profile = $this->guideProfile();
+        if ($profile) {
+            $profile->update([
+                'communication_style' => CommunicationStyle::from($this->communicationStyle),
+                'specializations' => $this->specializations,
+            ]);
+            session()->flash('success', __('Matching persona updated successfully.'));
+        }
     }
 
     /**

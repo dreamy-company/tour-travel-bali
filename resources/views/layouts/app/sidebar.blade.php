@@ -22,6 +22,12 @@
                         </flux:sidebar.item>
                     @endif
 
+                    @if (auth()->user()?->role === \App\Enums\UserRole::CUSTOMER || auth()->user()?->role === \App\Enums\UserRole::GUIDE)
+                        <flux:sidebar.item icon="chat-bubble-oval-left-ellipsis" href="{{ route('dashboard') }}" :current="request()->routeIs('chat.*')" wire:navigate>
+                            {{ __('Messages') }}
+                        </flux:sidebar.item>
+                    @endif
+
                     @if (auth()->user()?->role === \App\Enums\UserRole::ADMIN)
                         <flux:sidebar.item icon="shield-check" :href="route('admin.verification')" :current="request()->routeIs('admin.verification')" wire:navigate>
                             {{ __('Guide Verification') }}

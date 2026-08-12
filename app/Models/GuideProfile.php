@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CommunicationStyle;
 use App\Enums\TariffMode;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,8 @@ use Illuminate\Support\Carbon;
  * @property string $surat_sehat_file
  * @property string|null $vehicle_details
  * @property string|null $bio
+ * @property CommunicationStyle|null $communication_style
+ * @property array<int, string>|null $specializations
  * @property array<int, string> $languages
  * @property TariffMode $tariff_mode
  * @property float $base_rate
@@ -44,6 +47,8 @@ use Illuminate\Support\Carbon;
     'surat_sehat_file',
     'vehicle_details',
     'bio',
+    'communication_style',
+    'specializations',
     'languages',
     'tariff_mode',
     'base_rate',
@@ -68,6 +73,8 @@ class GuideProfile extends Model
             'ktpp_expired_at' => 'date',
             'skck_expired_at' => 'date',
             'languages' => 'array',
+            'communication_style' => CommunicationStyle::class,
+            'specializations' => 'array',
             'tariff_mode' => TariffMode::class,
             'base_rate' => 'decimal:2',
             'is_verified' => 'boolean',

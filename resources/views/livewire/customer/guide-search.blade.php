@@ -64,6 +64,38 @@
             </select>
         </div>
 
+        <!-- Activity Specializations (FR-02-01: same interest) -->
+        <div class="space-y-2">
+            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300 block">{{ __('Activity Specialization') }}</label>
+            <div class="flex flex-col gap-2">
+                @foreach (\App\Enums\Specialization::cases() as $spec)
+                    <label class="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            wire:model.live="selectedSpecializations"
+                            value="{{ $spec->value }}"
+                            class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800"
+                        />
+                        <span>{{ $spec->label() }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Communication Style (FR-02-01: same vibe) -->
+        <div class="space-y-2">
+            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300 block">{{ __('Communication Style') }}</label>
+            <select
+                wire:model.live="communicationStyle"
+                class="w-full text-sm px-3 py-2 rounded-lg border border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+            >
+                <option value="">{{ __('Any Vibe') }}</option>
+                @foreach (\App\Enums\CommunicationStyle::cases() as $style)
+                    <option value="{{ $style->value }}">{{ $style->label() }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <!-- Languages -->
         <div class="space-y-2">
             <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300 block">{{ __('Languages Fluency') }}</label>
@@ -337,6 +369,27 @@
 
                                 <p class="text-xs text-zinc-500 line-clamp-3 leading-relaxed">{{ $guideItem->guideProfile->bio ?: __('No biography provided.') }}</p>
                                 
+                                <!-- Specializations (matching tags) -->
+                                @if (! empty($guideItem->guideProfile->specializations))
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach (\App\Enums\Specialization::cases() as $spec)
+                                            @if (in_array($spec->value, $guideItem->guideProfile->specializations, true))
+                                                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-[9px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10 dark:bg-emerald-950/20 dark:text-emerald-400 dark:ring-emerald-500/20">
+                                                    {{ $spec->label() }}
+                                                </span>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <!-- Communication style -->
+                                @if ($guideItem->guideProfile->communication_style)
+                                    <div class="flex items-center gap-1">
+                                        <svg class="size-3 text-zinc-400 fill-current" viewBox="0 0 20 20"><path d="M10 2.75c-4.14 0-7.5 2.9-7.5 6.48 0 1.74.82 3.3 2.15 4.44-.15.9-.55 1.76-1.16 2.51a.75.75 0 0 0 .58 1.21c1.43 0 2.75-.48 3.79-1.26 1.35.58 2.9.9 4.64.9 4.14 0 7.5-2.9 7.5-6.48s-3.36-6.8-7.5-6.8Z" clip-rule="evenodd"/></svg>
+                                        <span class="text-[9px] font-semibold text-zinc-650 dark:text-zinc-400">{{ $guideItem->guideProfile->communication_style->label() }}</span>
+                                    </div>
+                                @endif
+
                                 <!-- Languages spoken -->
                                 <div class="flex flex-wrap gap-1">
                                     @foreach ($guideItem->guideProfile->languages as $lang)
@@ -355,14 +408,27 @@
                                     </span>
                                 </div>
 
-                                <button 
-                                    wire:click="selectGuide({{ $guideItem->id }})" 
-                                    type="button"
-                                    class="inline-flex items-center gap-1 px-3.5 py-2 text-xs font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 transition-colors shadow-xs"
-                                >
-                                    {{ __('Book Guide') }}
-                                    <svg class="size-3 stroke-current ml-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    @if (Auth::check() && auth()->user()->role === \App\Enums\UserRole::CUSTOMER)
+                                        <a
+                                            href="{{ route('chat.room', ['receiver' => $guideItem->id]) }}"
+                                            wire:navigate
+                                            class="inline-flex items-center gap-1 px-3.5 py-2 text-xs font-semibold rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                        >
+                                            <svg class="size-3.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
+                                            {{ __('Chat') }}
+                                        </a>
+                                    @endif
+
+                                    <button
+                                        wire:click="selectGuide({{ $guideItem->id }})"
+                                        type="button"
+                                        class="inline-flex items-center gap-1 px-3.5 py-2 text-xs font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 transition-colors shadow-xs"
+                                    >
+                                        {{ __('Book Guide') }}
+                                        <svg class="size-3 stroke-current ml-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     @empty

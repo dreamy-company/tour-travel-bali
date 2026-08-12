@@ -2,33 +2,87 @@
 
 namespace App\Livewire\Chat;
 
+use App\Enums\UserRole;
 use App\Models\Booking;
 use App\Models\ChatMessage;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
+#[Title('Chat')]
 class ChatRoom extends Component
 {
-    public int $bookingId;
+    public ?int $bookingId = null;
+    public int $receiverId;
     public string $newMessage = '';
 
     /**
-     * Mount the component and authorize access.
+     * Mount the component.
+     *
+     * Two entry modes:
+     * 1. Pre-booking chat (FR-02-02): mounted with a receiver user and no booking.
+     * 2. Booking-scoped chat: mounted with a bookingId (legacy usage).
+     *
+     * @param  User|null  $receiver  Route-bound receiver (pre-booking chat)
+     * @param  int|null  $bookingId  Booking-scoped thread
      */
-    public function mount(int $bookingId): void
+    public function mount(?User $receiver = null, ?int $bookingId = null): void
     {
-        $booking = Booking::find($bookingId);
+        if ($bookingId !== null) {
+            $booking = Booking::find($bookingId);
 
-        if (! $booking) {
-            abort(404, 'Booking not found.');
+            if (! $booking) {
+                abort(404, 'Booking not found.');
+            }
+
+            if (Auth::id() !== $booking->customer_id && Auth::id() !== $booking->guide_id) {
+                abort(403, 'Unauthorized access to this chat room.');
+            }
+
+            $this->bookingId = $bookingId;
+            $this->receiverId = Auth::id() === $booking->customer_id
+                ? $booking->guide_id
+                : $booking->customer_id;
+
+            return;
         }
 
-        if (Auth::id() !== $booking->customer_id && Auth::id() !== $booking->guide_id) {
+        // Pre-booking chat between a customer and a verified guide.
+        if (! $receiver) {
+            abort(404, 'Chat recipient not found.');
+        }
+
+        $this->receiverId = $receiver->id;
+        $this->authorizePreBookingChat($receiver);
+    }
+
+    /**
+     * Only customer ↔ guide conversations are permitted pre-booking.
+     */
+    protected function authorizePreBookingChat(User $receiver): void
+    {
+        $me = Auth::user();
+
+        if (! $me || $me->id === $receiver->id) {
             abort(403, 'Unauthorized access to this chat room.');
         }
 
-        $this->bookingId = $bookingId;
+        $roles = [$me->role->value, $receiver->role->value];
+
+        $isPair = in_array(UserRole::CUSTOMER->value, $roles, true)
+            && in_array(UserRole::GUIDE->value, $roles, true);
+
+        if (! $isPair) {
+            abort(403, 'Unauthorized access to this chat room.');
+        }
+
+        // A customer may only start a pre-booking chat with a verified guide.
+        if ($me->role === UserRole::CUSTOMER
+            && (! $receiver->guideProfile || ! $receiver->guideProfile->is_verified)) {
+            abort(403, 'This guide is not yet available for pre-booking chat.');
+        }
     }
 
     /**
@@ -40,10 +94,28 @@ class ChatRoom extends Component
      */
     private function fetchMessages(): Collection
     {
-        return ChatMessage::with('sender')
-            ->where('booking_id', $this->bookingId)
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $query = ChatMessage::with('sender');
+
+        if ($this->bookingId !== null) {
+            $query->where('booking_id', $this->bookingId);
+        } else {
+            $me = Auth::id();
+            $query->whereNull('booking_id')
+                ->where(function ($q) use ($me): void {
+                    $q->where(fn ($sub) => $sub->where('sender_id', $me)->where('receiver_id', $this->receiverId))
+                        ->orWhere(fn ($sub) => $sub->where('sender_id', $this->receiverId)->where('receiver_id', $me));
+                });
+        }
+
+        return $query->orderBy('created_at', 'asc')->get();
+    }
+
+    /**
+     * Get the conversation partner.
+     */
+    public function receiver(): User
+    {
+        return User::findOrFail($this->receiverId);
     }
 
     /**
@@ -59,6 +131,7 @@ class ChatRoom extends Component
         ChatMessage::create([
             'booking_id' => $this->bookingId,
             'sender_id' => Auth::id(),
+            'receiver_id' => $this->receiverId,
             'message' => trim($this->newMessage),
         ]);
 
@@ -77,6 +150,7 @@ class ChatRoom extends Component
     {
         return view('livewire.chat.chat-room', [
             'messages' => $this->fetchMessages(),
+            'receiver' => $this->receiver(),
         ]);
     }
 }

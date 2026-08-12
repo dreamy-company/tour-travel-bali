@@ -96,6 +96,59 @@
             </button>
         </div>
 
+        <!-- Persona & Matching Profile (FR-02-01) -->
+        <div class="flex flex-col border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs gap-6 h-fit">
+            <div>
+                <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">{{ __('Matching Persona') }}</h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Travelers match with guides of the same interest and vibe.') }}</p>
+            </div>
+
+            <hr class="border-zinc-200 dark:border-zinc-800" />
+
+            <!-- Communication Style -->
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300 block">{{ __('Communication Style') }}</label>
+                <select
+                    wire:model.blur="communicationStyle"
+                    class="w-full text-sm px-3 py-2 rounded-lg border border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                >
+                    <option value="">{{ __('Select style') }}</option>
+                    @foreach (\App\Enums\CommunicationStyle::cases() as $style)
+                        <option value="{{ $style->value }}">{{ $style->label() }}</option>
+                    @endforeach
+                </select>
+                @error('communicationStyle') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            <!-- Specializations -->
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300 block">{{ __('Activity Specializations') }}</label>
+                <div class="flex flex-col gap-2">
+                    @foreach (\App\Enums\Specialization::cases() as $spec)
+                        <label class="inline-flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                wire:model="specializations"
+                                value="{{ $spec->value }}"
+                                class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800"
+                            />
+                            <span>{{ $spec->label() }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                @error('specializations') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            <button
+                wire:click="updatePersona"
+                type="button"
+                class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-100 transition-colors shadow-xs"
+            >
+                <svg class="size-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                {{ __('Update Persona') }}
+            </button>
+        </div>
+
         <!-- RIGHT COLUMN: Packages Management (8 Cols) -->
         <div class="lg:col-span-8 flex flex-col gap-6">
             

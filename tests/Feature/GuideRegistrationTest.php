@@ -52,6 +52,8 @@ class GuideRegistrationTest extends TestCase
 
             // Step 2: Identity (Tier 1 KYC)
             ->set('ktp_number', '5102030405060708')
+            ->set('communication_style', 'edukatif')
+            ->set('specializations', ['culture_history', 'photography'])
             ->set('languages', ['id', 'en'])
             ->set('bio', 'Certified Balinese culture guide.')
             ->set('ktp_photo', $ktpPhoto)
@@ -84,6 +86,8 @@ class GuideRegistrationTest extends TestCase
         $this->assertNotNull($profile);
         $this->assertFalse($profile->is_verified);
         $this->assertNotNull($profile->signed_sop_at);
+        $this->assertEquals('edukatif', $profile->communication_style->value);
+        $this->assertContains('culture_history', $profile->specializations);
 
         // Verify Secure file uploads to private local storage
         Storage::disk('local')->assertExists($profile->ktp_photo);

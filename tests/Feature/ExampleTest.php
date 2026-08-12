@@ -11,8 +11,10 @@ class ExampleTest extends TestCase
 
     public function test_returns_a_successful_response(): void
     {
-        $response = $this->get(route('home'));
+        // The home route redirects guests to the login screen
+        // and authenticated users to their dashboard.
+        $this->get(route('home'))->assertRedirect(route('login'));
 
-        $response->assertOk();
+        $this->get(route('login'))->assertOk();
     }
 }

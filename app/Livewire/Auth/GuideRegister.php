@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Auth;
 
+use App\Enums\CommunicationStyle;
+use App\Enums\Specialization;
 use App\Enums\TariffMode;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
@@ -32,6 +34,9 @@ class GuideRegister extends Component
 
     // Step 2: Identity (Tier 1 KYC)
     public string $ktp_number = '';
+    public string $communication_style = '';
+    /** @var array<int, string> */
+    public array $specializations = [];
     public string $bio = '';
     public array $languages = ['id', 'en'];
     /** @var mixed */
@@ -69,6 +74,9 @@ class GuideRegister extends Component
             ],
             2 => [
                 'ktp_number' => ['required', 'string', 'regex:/^\d{16}$/'],
+                'communication_style' => ['required', 'string', 'in:' . implode(',', array_column(CommunicationStyle::cases(), 'value'))],
+                'specializations' => ['required', 'array', 'min:1'],
+                'specializations.*' => ['string', 'in:' . implode(',', array_column(Specialization::cases(), 'value'))],
                 'bio' => ['nullable', 'string', 'max:1000'],
                 'languages' => ['required', 'array', 'min:1'],
                 'languages.*' => ['string', 'in:id,en,jp,fr,de'],
@@ -198,6 +206,8 @@ class GuideRegister extends Component
                 'skck_expired_at' => $this->skck_expired_at,
                 'surat_sehat_file' => $suratSehatFilePath,
                 'bio' => $this->bio ?: null,
+                'communication_style' => $this->communication_style ?: CommunicationStyle::SANTAI->value,
+                'specializations' => $this->specializations ?: [Specialization::CULTURE_HISTORY->value],
                 'languages' => $this->languages,
                 'tariff_mode' => TariffMode::DAILY, // default
                 'base_rate' => 0.00,

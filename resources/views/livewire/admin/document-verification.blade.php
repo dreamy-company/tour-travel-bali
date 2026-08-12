@@ -111,6 +111,31 @@
                     </div>
                 </div>
 
+                <!-- Matching Persona (FR-02-01) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">{{ __('Communication Style') }}</span>
+                        <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                            {{ $profile->communication_style ? $profile->communication_style->label() : __('—') }}
+                        </p>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">{{ __('Activity Specializations') }}</span>
+                        <div class="flex flex-wrap gap-1 mt-0.5">
+                            @forelse (($profile->specializations ?? []) as $spec)
+                                @php
+                                    $specEnum = \App\Enums\Specialization::tryFrom($spec);
+                                @endphp
+                                <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10 dark:bg-emerald-950/20 dark:text-emerald-400 dark:ring-emerald-500/20">
+                                    {{ $specEnum?->label() ?? $spec }}
+                                </span>
+                            @empty
+                                <span class="text-xs text-zinc-400">{{ __('—') }}</span>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Bio & Details -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border dark:border-zinc-800">
                     <div>

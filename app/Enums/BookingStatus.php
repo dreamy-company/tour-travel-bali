@@ -11,5 +11,6 @@ enum BookingStatus: string
     case HEADING_TO_LOCATION = 'heading_to_location';
     case ONGOING = 'ongoing';
     case COMPLETED = 'completed';
+    case CANCELLED = 'cancelled';
     case DISPUTED = 'disputed';
 }

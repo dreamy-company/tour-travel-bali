@@ -174,6 +174,38 @@
                     </div>
                 </div>
 
+                <!-- Communication Style & Specializations (SRS Matching Parameters) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block">{{ __('Communication Style') }}</label>
+                        <select
+                            wire:model.blur="communication_style"
+                            required
+                            class="w-full text-xs px-3.5 py-2.5 rounded-lg border border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+                        >
+                            <option value="">{{ __('Select your communication style') }}</option>
+                            @foreach (\App\Enums\CommunicationStyle::cases() as $style)
+                                <option value="{{ $style->value }}">{{ $style->label() }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-[10px] text-zinc-500">{{ __('This is used by travelers to match with guides of the same vibe.') }}</p>
+                        @error('communication_style') <span class="text-[10px] text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block">{{ __('Activity Specializations') }}</label>
+                        <div class="grid grid-cols-1 gap-2 mt-2">
+                            @foreach (\App\Enums\Specialization::cases() as $spec)
+                                <label class="inline-flex items-center gap-2 text-xs text-zinc-650 dark:text-zinc-400 cursor-pointer">
+                                    <input type="checkbox" wire:model="specializations" value="{{ $spec->value }}" class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800" />
+                                    <span>{{ $spec->label() }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('specializations') <span class="text-[10px] text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
                 <!-- KTP and Headshot Uploads -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-1.5">

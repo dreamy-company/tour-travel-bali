@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Models\GuideProfile;
 use App\Models\User;
+use App\Enums\CommunicationStyle;
+use App\Enums\Specialization;
 use App\Enums\TariffMode;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -28,6 +30,8 @@ class GuideProfileFactory extends Factory
             'surat_sehat_file' => 'files/sehat.pdf',
             'vehicle_details' => fake()->sentence(),
             'bio' => fake()->paragraph(),
+            'communication_style' => fake()->randomElement(CommunicationStyle::cases()),
+            'specializations' => fake()->randomElements(array_column(Specialization::cases(), 'value'), 2),
             'languages' => ['id', 'en'],
             'tariff_mode' => TariffMode::DAILY,
             'base_rate' => 500000.00,
