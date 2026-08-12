@@ -11,6 +11,9 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/guides', \App\Livewire\Customer\GuideSearch::class)->name('guides.index');
+Route::get('/guides/{guideProfile}', \App\Livewire\Customer\GuideShow::class)->name('guides.show');
+Route::get('/guides/{guideProfile}/book', \App\Livewire\Customer\BookingForm::class)->name('guides.book');
+Route::get('/guide-photos/{guideProfile}', [\App\Http\Controllers\GuidePhotoController::class, 'show'])->name('guides.photo');
 
 Route::middleware('guest')->group(function () {
     Route::get('register/guide', GuideRegister::class)->name('register.guide');

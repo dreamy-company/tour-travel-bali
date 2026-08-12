@@ -7,7 +7,7 @@ use App\Enums\EscrowStatus;
 use App\Enums\TariffMode;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
-use App\Livewire\Customer\GuideSearch;
+use App\Livewire\Customer\BookingForm;
 use App\Livewire\Guide\OrderManagement;
 use App\Models\Booking;
 use App\Models\EscrowTransaction;
@@ -47,7 +47,7 @@ class BookingLifecycleTest extends TestCase
         ]);
 
         // 3. Create guide profile
-        GuideProfile::factory()->create([
+        $profile = GuideProfile::factory()->create([
             'user_id' => $guide->id,
             'base_rate' => 500000.00,
             'tariff_mode' => TariffMode::DAILY,
@@ -56,14 +56,12 @@ class BookingLifecycleTest extends TestCase
 
         // 4. Create custom itinerary booking (as Customer)
         Livewire::actingAs($customer)
-            ->test(GuideSearch::class)
-            ->call('selectGuide', $guide->id)
+            ->test(BookingForm::class, ['guideProfile' => $profile])
             ->set('pickupLocation', 'Sheraton Kuta Resort')
-            ->set('dropoffLocation', 'Sheraton Kuta Resort')
             ->set('customDestinations', ['Ubud Monkey Forest'])
             ->set('scheduleDate', now()->addDays(2)->toDateString())
             ->set('pickupTime', '08:00')
-            ->call('book');
+            ->call('submitBooking');
 
         // Verify booking creation in database
         $booking = Booking::first();
