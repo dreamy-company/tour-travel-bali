@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/bookings/{booking?}', \App\Livewire\Customer\BookingTracker::class)->name('bookings.tracker');
     Route::post('/bookings/{booking}/checkout', [PaymentController::class, 'checkout'])->name('bookings.checkout');
+    Route::get('/chat', \App\Livewire\Chat\Inbox::class)->name('chat.inbox');
     Route::get('/chat/{receiver}', \App\Livewire\Chat\ChatRoom::class)->name('chat.room');
 
     // Role-aware dashboard shell: customers land on the trips hub.

@@ -40,6 +40,9 @@
                             <a href="{{ route('favorites') }}" wire:navigate class="px-4 py-2 text-sm font-semibold hover:bg-surface-soft dark:hover:bg-zinc-800 rounded-full transition-colors text-muted dark:text-zinc-400 {{ request()->routeIs('favorites') ? 'text-ink dark:text-white' : '' }}">
                                 {{ __('Favorites') }}
                             </a>
+                            <a href="{{ route('chat.inbox') }}" wire:navigate class="px-4 py-2 text-sm font-semibold hover:bg-surface-soft dark:hover:bg-zinc-800 rounded-full transition-colors text-muted dark:text-zinc-400 {{ request()->routeIs('chat.*') ? 'text-ink dark:text-white' : '' }}">
+                                {{ __('Messages') }}
+                            </a>
                         @endif
                     @endauth
                 </nav>

@@ -23,7 +23,7 @@
                     @endif
 
                     @if (auth()->user()?->role === \App\Enums\UserRole::CUSTOMER || auth()->user()?->role === \App\Enums\UserRole::GUIDE)
-                        <flux:sidebar.item icon="chat-bubble-oval-left-ellipsis" href="{{ route('dashboard') }}" :current="request()->routeIs('chat.*')" wire:navigate>
+                        <flux:sidebar.item icon="chat-bubble-oval-left-ellipsis" :href="route('chat.inbox')" :current="request()->routeIs('chat.*')" wire:navigate>
                             {{ __('Messages') }}
                         </flux:sidebar.item>
                     @endif

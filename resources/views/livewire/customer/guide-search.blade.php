@@ -1,4 +1,4 @@
-<div>
+<div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
     <!-- LEFT: Sidebar Filters -->
     <aside class="lg:w-72 shrink-0">
         <div class="lg:sticky lg:top-24 border border-hairline rounded-[14px] bg-white p-6 flex flex-col gap-6">

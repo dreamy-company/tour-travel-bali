@@ -25,7 +25,7 @@
     <!-- Messages Container with Polling -->
     <div 
         x-ref="messageContainer"
-        wire:poll.3s="$refresh"
+        wire:poll.3s="pollMessages"
         class="h-64 overflow-y-auto space-y-2 pr-1 scroll-smooth"
     >
         @forelse ($messages as $msg)

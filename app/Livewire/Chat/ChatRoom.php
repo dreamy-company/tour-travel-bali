@@ -8,6 +8,7 @@ use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -30,6 +31,11 @@ class ChatRoom extends Component
      */
     public function mount(?User $receiver = null, ?int $bookingId = null): void
     {
+        // Inbox links open booking threads via ?booking= query param.
+        if ($bookingId === null && Request::query('booking')) {
+            $bookingId = (int) Request::query('booking');
+        }
+
         if ($bookingId !== null) {
             $booking = Booking::find($bookingId);
 
@@ -46,6 +52,8 @@ class ChatRoom extends Component
                 ? $booking->guide_id
                 : $booking->customer_id;
 
+            $this->markThreadAsRead();
+
             return;
         }
 
@@ -56,6 +64,32 @@ class ChatRoom extends Component
 
         $this->receiverId = $receiver->id;
         $this->authorizePreBookingChat($receiver);
+        $this->markThreadAsRead();
+    }
+
+    /**
+     * Mark all incoming messages in the current thread as read.
+     */
+    protected function markThreadAsRead(): void
+    {
+        $me = Auth::id();
+
+        ChatMessage::where('receiver_id', $me)
+            ->where('is_read', false)
+            ->when(
+                $this->bookingId !== null,
+                fn ($q) => $q->where('booking_id', $this->bookingId),
+                fn ($q) => $q->whereNull('booking_id')->where('sender_id', $this->receiverId)
+            )
+            ->update(['is_read' => true]);
+    }
+
+    /**
+     * Polled while the chat is open: keeps read receipts fresh.
+     */
+    public function pollMessages(): void
+    {
+        $this->markThreadAsRead();
     }
 
     /**
