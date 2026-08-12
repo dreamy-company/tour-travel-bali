@@ -4,6 +4,7 @@ namespace App\Livewire\Chat;
 
 use App\Enums\UserRole;
 use App\Models\ChatMessage;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -23,6 +24,10 @@ class Inbox extends Component
     /**
      * All conversations involving the current user, newest first.
      *
+     * Threads whose partner cannot be resolved (e.g. legacy messages
+     * predating the receiver_id column) are skipped so no broken links
+     * are produced.
+     *
      * @return \Illuminate\Support\Collection<int, array<string, mixed>>
      */
     #[Computed]
@@ -37,45 +42,60 @@ class Inbox extends Component
             ->latest()
             ->get();
 
+        // Resolve the other party of a message (null for legacy rows).
+        $partnerOf = function (ChatMessage $m) use ($me): ?User {
+            return $m->sender_id === $me ? $m->receiver : $m->sender;
+        };
+
         // Group pre-booking messages by the partner user.
         $preBooking = $messages->whereNull('booking_id')
             ->groupBy(fn (ChatMessage $m) => $m->sender_id === $me ? $m->receiver_id : $m->sender_id)
-            ->map(function (Collection $group) use ($me): array {
+            ->map(function (Collection $group) use ($me, $partnerOf): ?array {
                 $last = $group->first();
-                $partner = $last->sender_id === $me ? $last->receiver : $last->sender;
+                $partner = $partnerOf($last);
+
+                if (! $partner) {
+                    return null;
+                }
 
                 return [
-                    'id' => 'pre-' . $partner?->id,
-                    'partner_id' => $partner?->id,
-                    'partner_name' => $partner?->name ?? __('Unknown'),
-                    'partner_initials' => $partner ? $partner->initials() : '?',
+                    'id' => 'pre-' . $partner->id,
+                    'partner_id' => $partner->id,
+                    'partner_name' => $partner->name,
+                    'partner_initials' => $partner->initials(),
                     'booking_id' => null,
                     'booking_label' => __('Pre-Booking Chat'),
                     'last_message' => $last->message,
                     'last_at' => $last->created_at,
                     'unread' => $group->where('receiver_id', $me)->where('is_read', false)->count(),
                 ];
-            });
+            })
+            ->filter();
 
         // Group booking-scoped messages by the booking.
         $booking = $messages->whereNotNull('booking_id')
             ->groupBy('booking_id')
-            ->map(function (Collection $group) use ($me): array {
+            ->map(function (Collection $group) use ($me, $partnerOf): ?array {
                 $last = $group->first();
-                $partner = $last->sender_id === $me ? $last->receiver : $last->sender;
+                $partner = $partnerOf($last);
+
+                if (! $partner) {
+                    return null;
+                }
 
                 return [
                     'id' => 'booking-' . $last->booking_id,
-                    'partner_id' => $partner?->id,
-                    'partner_name' => $partner?->name ?? __('Unknown'),
-                    'partner_initials' => $partner ? $partner->initials() : '?',
+                    'partner_id' => $partner->id,
+                    'partner_name' => $partner->name,
+                    'partner_initials' => $partner->initials(),
                     'booking_id' => $last->booking_id,
                     'booking_label' => __('Booking') . ' #' . str_pad((string) $last->booking_id, 8, '0', STR_PAD_LEFT),
                     'last_message' => $last->message,
                     'last_at' => $last->created_at,
                     'unread' => $group->where('receiver_id', $me)->where('is_read', false)->count(),
                 ];
-            });
+            })
+            ->filter();
 
         return $preBooking
             ->concat($booking)

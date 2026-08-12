@@ -136,4 +136,33 @@ class ChatInboxTest extends TestCase
     {
         $this->get(route('chat.inbox'))->assertRedirect(route('login'));
     }
+
+    /**
+     * Legacy messages without a receiver (pre-migration rows) must not
+     * produce broken thread links — they are skipped gracefully.
+     */
+    public function test_inbox_skips_legacy_messages_without_receiver(): void
+    {
+        [$customer, $guide] = $this->makeCustomerAndGuide();
+
+        // Normal resolvable pre-booking thread.
+        ChatMessage::create([
+            'sender_id' => $customer->id,
+            'receiver_id' => $guide->id,
+            'message' => 'Hi there!',
+        ]);
+
+        // Legacy row sent by the guide with a NULL receiver.
+        ChatMessage::create([
+            'sender_id' => $guide->id,
+            'receiver_id' => null,
+            'message' => 'Orphan legacy message',
+        ]);
+
+        Livewire::actingAs($guide)
+            ->test(Inbox::class)
+            ->assertOk()
+            ->assertSee('Traveler Alex')
+            ->assertDontSee('Orphan legacy message');
+    }
 }
