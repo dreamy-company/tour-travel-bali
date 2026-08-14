@@ -4,8 +4,10 @@ namespace App\Livewire\Customer;
 
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Enums\ZodiacSign;
 use App\Models\Favorite;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -33,10 +35,17 @@ class GuideSearch extends Component
 
     /** Tariff range */
     public string $minPrice = '';
+
     public string $maxPrice = '';
 
     /** Tariff mode toggle ('' = any, 'hourly', 'daily') */
     public string $tariffMode = '';
+
+    /** Zodiac sign filter ('' = any) */
+    public string $zodiacSign = '';
+
+    /** Rank guides by zodiac compatibility with the logged-in customer */
+    public bool $cosmicMatch = false;
 
     /** @var array<int, string> Language fluency */
     public array $selectedLanguages = [];
@@ -56,6 +65,12 @@ class GuideSearch extends Component
             $this->selectedSpecializations = [$vibe];
         }
 
+        $zodiac = (string) Request::query('zodiac');
+
+        if ($zodiac !== '' && ZodiacSign::tryFrom($zodiac) !== null) {
+            $this->zodiacSign = $zodiac;
+        }
+
         if (Auth::check() && Auth::user()->role === UserRole::CUSTOMER) {
             $this->favoriteGuideIds = Auth::user()->favorites()->pluck('guide_id')->map(fn ($id) => (int) $id)->all();
         }
@@ -69,6 +84,7 @@ class GuideSearch extends Component
         if (! Auth::check()) {
             session()->flash('warning', __('Log in to save guides to your favorites.'));
             $this->redirect(route('login'), navigate: true);
+
             return;
         }
 
@@ -103,7 +119,40 @@ class GuideSearch extends Component
             'maxPrice',
             'tariffMode',
             'selectedLanguages',
+            'zodiacSign',
+            'cosmicMatch',
         ]);
+    }
+
+    /**
+     * The zodiac sign of the authenticated customer, or null when the
+     * customer has not set a birth date (or is a guest).
+     */
+    #[Computed]
+    public function customerZodiac(): ?ZodiacSign
+    {
+        if (! Auth::check()) {
+            return null;
+        }
+
+        return Auth::user()->zodiac();
+    }
+
+    /**
+     * Compatibility score between the customer and a guide, or null when
+     * either side has no zodiac sign.
+     */
+    public function zodiacCompatibility(int $guideId): ?int
+    {
+        $customerSign = $this->customerZodiac;
+
+        if ($customerSign === null) {
+            return null;
+        }
+
+        $guideSign = $this->guides->firstWhere('id', $guideId)?->zodiac();
+
+        return $guideSign === null ? null : $customerSign->compatibility($guideSign);
     }
 
     /**
@@ -114,9 +163,9 @@ class GuideSearch extends Component
     #[Computed]
     public function guides(): Collection
     {
-        return User::query()
+        $guides = User::query()
             ->where('role', UserRole::GUIDE)
-            ->where('status', \App\Enums\UserStatus::ACTIVE)
+            ->where('status', UserStatus::ACTIVE)
             ->whereHas('guideProfile', function ($query) {
                 $query->where('is_verified', true);
 
@@ -158,12 +207,30 @@ class GuideSearch extends Component
             ->withAvg('guideReviews', 'rating')
             ->latest()
             ->get();
+
+        // Zodiac sign filter — derived in PHP because the sign is computed
+        // from birth_date rather than stored as a column.
+        if ($this->zodiacSign !== '') {
+            $guides = $guides->filter(
+                fn (User $guide) => $guide->zodiac()?->value === $this->zodiacSign
+            )->values();
+        }
+
+        // Cosmic match — rank by compatibility with the customer's sign;
+        // guides without a birth date sort last.
+        if ($this->cosmicMatch && $this->customerZodiac !== null) {
+            $guides = $guides->sortByDesc(
+                fn (User $guide) => $guide->zodiac()?->compatibility($this->customerZodiac) ?? -1
+            )->values();
+        }
+
+        return $guides;
     }
 
     /**
      * Render the component view.
      */
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return view('livewire.customer.guide-search');
     }

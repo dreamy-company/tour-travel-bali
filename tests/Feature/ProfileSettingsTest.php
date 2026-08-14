@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\UserRole;
 use App\Livewire\Customer\ProfileSettings;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,13 +30,40 @@ class ProfileSettingsTest extends TestCase
             ->set('name', 'New Name')
             ->set('email', 'new@example.com')
             ->set('phone_number', '081234567890')
+            ->set('birth_date', '1990-08-10')
             ->call('updateProfile');
 
         $customer->refresh();
         $this->assertEquals('New Name', $customer->name);
         $this->assertEquals('new@example.com', $customer->email);
         $this->assertEquals('081234567890', $customer->phone_number);
+        $this->assertEquals('1990-08-10', $customer->birth_date->format('Y-m-d'));
         $this->assertNull($customer->email_verified_at);
+    }
+
+    public function test_customer_can_clear_birth_date(): void
+    {
+        $customer = User::factory()->customer()->create([
+            'birth_date' => '1990-08-10',
+        ]);
+
+        Livewire::actingAs($customer)
+            ->test(ProfileSettings::class)
+            ->set('birth_date', '')
+            ->call('updateProfile');
+
+        $this->assertNull($customer->refresh()->birth_date);
+    }
+
+    public function test_future_birth_date_is_rejected(): void
+    {
+        $customer = User::factory()->customer()->create();
+
+        Livewire::actingAs($customer)
+            ->test(ProfileSettings::class)
+            ->set('birth_date', now()->addYear()->toDateString())
+            ->call('updateProfile')
+            ->assertHasErrors('birth_date');
     }
 
     public function test_customer_can_change_password(): void

@@ -7,7 +7,7 @@
                     <h3 class="text-lg font-semibold tracking-[-0.3px] text-ink">{{ __('Filters') }}</h3>
                     <p class="text-sm text-muted mt-0.5">{{ __('Match with guides of the same interest and vibe.') }}</p>
                 </div>
-                @if ($selectedSpecializations || $communicationStyle !== '' || $minPrice !== '' || $maxPrice !== '' || $tariffMode !== '' || $selectedLanguages)
+                @if ($selectedSpecializations || $communicationStyle !== '' || $minPrice !== '' || $maxPrice !== '' || $tariffMode !== '' || $selectedLanguages || $zodiacSign !== '' || $cosmicMatch)
                     <button type="button" wire:click="resetFilters" class="text-sm font-semibold text-rausch hover:text-rausch-active underline underline-offset-4">
                         {{ __('Clear') }}
                     </button>
@@ -52,7 +52,45 @@
 
             <hr class="border-hairline" />
 
-            {{-- 3. Tariff Range + Mode Toggle --}}
+            {{-- 3. Zodiac Sign + Cosmic Match --}}
+            <div class="space-y-3">
+                <label class="text-sm font-semibold text-ink block">{{ __('Zodiac Sign') }}</label>
+                <select
+                    wire:model.live="zodiacSign"
+                    class="w-full text-sm px-3.5 py-2.5 rounded-full border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch"
+                >
+                    <option value="">{{ __('Any sign') }}</option>
+                    @foreach (\App\Enums\ZodiacSign::cases() as $sign)
+                        <option value="{{ $sign->value }}">{{ $sign->symbol() }} {{ $sign->label() }}</option>
+                    @endforeach
+                </select>
+
+                <label class="flex items-center justify-between gap-3 cursor-pointer rounded-[14px] border border-hairline px-4 py-3 {{ $cosmicMatch ? 'border-rausch bg-rausch/5' : '' }}">
+                    <span class="flex items-center gap-2 text-sm font-medium text-ink">
+                        <span class="text-base">✨</span>
+                        {{ __('Cosmic Match') }}
+                    </span>
+                    <input
+                        type="checkbox"
+                        wire:model.live="cosmicMatch"
+                        class="size-4 rounded border-hairline text-rausch focus:ring-rausch focus:ring-2"
+                    />
+                </label>
+                @if ($this->customerZodiac !== null)
+                    <p class="text-xs text-muted leading-relaxed">
+                        {{ __('Ranked by compatibility with your sign:') }}
+                        <span class="font-semibold text-ink">{{ $this->customerZodiac->symbol() }} {{ $this->customerZodiac->label() }}</span>
+                    </p>
+                @else
+                    <p class="text-xs text-muted leading-relaxed">
+                        {{ __('Add your birth date in Profile Settings to rank guides by zodiac compatibility.') }}
+                    </p>
+                @endif
+            </div>
+
+            <hr class="border-hairline" />
+
+            {{-- 4. Tariff Range + Mode Toggle --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-ink block">{{ __('Tariff') }}</label>
                 <div class="grid grid-cols-2 gap-2">
@@ -106,7 +144,7 @@
 
             <hr class="border-hairline" />
 
-            {{-- 4. Languages --}}
+            {{-- 5. Languages --}}
             <div class="space-y-2.5">
                 <label class="text-sm font-semibold text-ink block">{{ __('Languages') }}</label>
                 <div class="flex flex-col gap-2.5">
@@ -191,6 +229,26 @@
                                 @endif
                             @endforeach
                         </div>
+
+                        {{-- Zodiac badge + cosmic match score --}}
+                        @php
+                            $guideSign = $guide->zodiac();
+                            $matchScore = $guideSign !== null && $this->customerZodiac !== null ? $this->customerZodiac->compatibility($guideSign) : null;
+                        @endphp
+                        @if ($guideSign !== null)
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="inline-flex items-center gap-1.5 text-xs text-muted">
+                                    <span class="text-sm leading-none">{{ $guideSign->symbol() }}</span>
+                                    <span class="font-medium text-ink">{{ $guideSign->label() }}</span>
+                                    <span title="{{ ucfirst($guideSign->element()) }} element">{{ $guideSign->elementEmoji() }}</span>
+                                </span>
+                                @if ($matchScore !== null && $cosmicMatch)
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {{ $matchScore >= 80 ? 'bg-emerald-50 text-emerald-700' : ($matchScore >= 70 ? 'bg-sky-50 text-sky-700' : ($matchScore >= 60 ? 'bg-amber-50 text-amber-700' : 'bg-zinc-100 text-zinc-600')) }}">
+                                        {{ $matchScore }}% {{ __('match') }}
+                                    </span>
+                                @endif
+                            </div>
+                        @endif
 
                         {{-- Base rate + View Profile --}}
                         <div class="flex items-center justify-between pt-1 border-t border-hairline-soft mt-1">

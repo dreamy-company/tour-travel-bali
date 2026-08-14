@@ -15,7 +15,10 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->get(route('login'));
 
-        $response->assertOk();
+        $response->assertOk()
+            ->assertSee('Welcome back')
+            ->assertSee('Become a guide')
+            ->assertSee('Log in - BaliGuide');
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void

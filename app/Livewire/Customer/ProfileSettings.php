@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Customer;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -19,12 +20,18 @@ class ProfileSettings extends Component
 {
     // ── Profile form ──────────────────────────────────────────────
     public string $name = '';
+
     public string $email = '';
+
     public string $phone_number = '';
+
+    public string $birth_date = '';
 
     // ── Password form ─────────────────────────────────────────────
     public string $current_password = '';
+
     public string $new_password = '';
+
     public string $new_password_confirmation = '';
 
     // ── Traveler persona preferences ──────────────────────────────
@@ -60,6 +67,7 @@ class ProfileSettings extends Component
         $this->name = $user->name;
         $this->email = $user->email;
         $this->phone_number = $user->phone_number ?? '';
+        $this->birth_date = $user->birth_date?->format('Y-m-d') ?? '';
         $this->traveler_preferences = $user->traveler_preferences ?? [];
     }
 
@@ -74,12 +82,14 @@ class ProfileSettings extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'phone_number' => ['nullable', 'string', 'min:10', 'max:20'],
+            'birth_date' => ['nullable', 'date', 'before_or_equal:today', 'after_or_equal:1900-01-01'],
         ]);
 
         $user->fill([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone_number' => $validated['phone_number'] ?: null,
+            'birth_date' => $validated['birth_date'] ?: null,
         ]);
 
         if ($user->isDirty('email')) {
@@ -119,7 +129,7 @@ class ProfileSettings extends Component
 
         $this->validate([
             'traveler_preferences' => ['nullable', 'array'],
-            'traveler_preferences.*' => ['string', 'in:' . implode(',', $options)],
+            'traveler_preferences.*' => ['string', 'in:'.implode(',', $options)],
         ]);
 
         Auth::user()->update([
@@ -132,7 +142,7 @@ class ProfileSettings extends Component
     /**
      * Render the component view.
      */
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return view('livewire.customer.profile-settings');
     }

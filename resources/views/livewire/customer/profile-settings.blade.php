@@ -16,7 +16,7 @@
         <section class="border border-hairline rounded-[14px] bg-white p-6 sm:p-8 space-y-6">
             <div>
                 <h2 class="text-lg font-semibold tracking-[-0.3px] text-ink">{{ __('Account Information') }}</h2>
-                <p class="text-sm text-muted mt-1">{{ __('Update your name, email, and contact number.') }}</p>
+                <p class="text-sm text-muted mt-1">{{ __('Update your name, email, contact number, and birth date.') }}</p>
             </div>
             <hr class="border-hairline" />
 
@@ -40,6 +40,23 @@
                     <label for="profile-phone" class="text-sm font-semibold text-ink block">{{ __('Phone Number') }}</label>
                     <input id="profile-phone" wire:model="phone_number" type="tel" placeholder="08xxxxxxxxxx" class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink placeholder:text-muted-soft focus:outline-hidden focus:ring-2 focus:ring-rausch" />
                     @error('phone_number') <span class="text-xs text-error-text block mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="profile-birth-date" class="text-sm font-semibold text-ink block">{{ __('Birth Date') }}</label>
+                    <input id="profile-birth-date" wire:model="birth_date" type="date" max="{{ now()->toDateString() }}" class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch" />
+                    @error('birth_date') <span class="text-xs text-error-text block mt-1">{{ $message }}</span> @enderror
+                    @php $previewSign = \App\Services\ZodiacService::fromDate($birth_date); @endphp
+                    @if ($previewSign !== null)
+                        <p class="text-xs text-muted flex items-center gap-1.5 mt-1">
+                            <span class="text-sm leading-none">{{ $previewSign->symbol() }}</span>
+                            <span>{{ $previewSign->label() }}</span>
+                            <span>{{ $previewSign->elementEmoji() }}</span>
+                            <span>· {{ __('used for zodiac matching') }}</span>
+                        </p>
+                    @elseif ($birth_date !== '')
+                        <p class="text-xs text-error-text mt-1">{{ __('This date is not valid for zodiac matching.') }}</p>
+                    @endif
                 </div>
 
                 <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg bg-rausch text-white hover:bg-rausch-active transition-colors shadow-airbnb">

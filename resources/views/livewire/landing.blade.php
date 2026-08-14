@@ -59,6 +59,30 @@
         </div>
     </section>
 
+    {{-- ZODIAC COSMIC MATCH --}}
+    <section class="space-y-6">
+        <div class="flex items-end justify-between">
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-semibold tracking-[-0.44px] text-ink">{{ __('What is your sign?') }}</h2>
+                <p class="text-sm text-muted mt-1.5">{{ __('Match with guides by zodiac sign compatibility — a cosmic pairing for your Bali trip.') }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            @foreach (\App\Enums\ZodiacSign::cases() as $sign)
+                <a
+                    href="{{ route('guides.index', ['zodiac' => $sign->value]) }}"
+                    wire:navigate
+                    class="group flex flex-col items-center gap-1.5 rounded-[14px] border border-hairline bg-white p-4 text-center hover:border-rausch hover:shadow-airbnb transition-all"
+                >
+                    <span class="text-2xl leading-none group-hover:scale-110 transition-transform">{{ $sign->symbol() }}</span>
+                    <span class="text-sm font-semibold text-ink">{{ $sign->label() }}</span>
+                    <span class="text-[10px] text-muted-soft uppercase tracking-wider">{{ ucfirst($sign->element()) }}</span>
+                </a>
+            @endforeach
+        </div>
+    </section>
+
     {{-- FEATURED VERIFIED GUIDES --}}
     <section class="space-y-6">
         <div class="flex items-end justify-between">
@@ -117,7 +141,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach ([
-                ['step' => '1', 'title' => 'Find Guide', 'text' => 'Filter verified local guides by specialization, vibe, and tariff.'],
+                ['step' => '1', 'title' => 'Find Guide', 'text' => 'Filter verified local guides by specialization, vibe, tariff, and even zodiac sign.'],
                 ['step' => '2', 'title' => 'Pre-Booking Chat', 'text' => 'Chat directly to align expectations and craft your custom itinerary.'],
                 ['step' => '3', 'title' => 'Secure Escrow Pay', 'text' => 'Pay through escrow — funds are released to the guide only after the tour completes.'],
                 ['step' => '4', 'title' => 'Start Tour', 'text' => 'Track your trip live and rate your guide after an unforgettable day.'],

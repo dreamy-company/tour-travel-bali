@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Enums\ZodiacSign;
+use App\Services\ZodiacService;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -27,6 +29,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $phone_number
+ * @property Carbon|null $birth_date
  * @property UserRole $role
  * @property UserStatus $status
  * @property array<int, string>|null $traveler_preferences
@@ -37,7 +40,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'phone_number', 'role', 'status', 'traveler_preferences'])]
+#[Fillable(['name', 'email', 'password', 'phone_number', 'birth_date', 'role', 'status', 'traveler_preferences'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -53,6 +56,7 @@ class User extends Authenticatable implements PasskeyUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'birth_date' => 'date',
             'password' => 'hashed',
             'role' => UserRole::class,
             'status' => UserStatus::class,
@@ -70,6 +74,14 @@ class User extends Authenticatable implements PasskeyUser
         return Str::length($initials) > 1
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
+    }
+
+    /**
+     * Derive the zodiac sign from the birth date, or null when unset.
+     */
+    public function zodiac(): ?ZodiacSign
+    {
+        return ZodiacService::fromDate($this->birth_date);
     }
 
     /**

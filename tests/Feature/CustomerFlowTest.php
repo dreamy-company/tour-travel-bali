@@ -5,11 +5,9 @@ namespace Tests\Feature;
 use App\Enums\BookingStatus;
 use App\Enums\EscrowStatus;
 use App\Enums\TariffMode;
-use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Livewire\Customer\BookingForm;
 use App\Livewire\Customer\GuideSearch;
-use App\Livewire\Customer\GuideShow;
 use App\Models\Booking;
 use App\Models\EscrowTransaction;
 use App\Models\GuideProfile;
@@ -152,6 +150,34 @@ class CustomerFlowTest extends TestCase
         ]);
 
         $this->get(route('guides.show', $profile))->assertNotFound();
+    }
+
+    public function test_detail_page_shows_guide_zodiac_sign(): void
+    {
+        [$guide, $profile] = $this->makeVerifiedGuide();
+        $guide->update(['birth_date' => '1990-08-10']); // Leo
+
+        $this->get(route('guides.show', $profile))
+            ->assertOk()
+            ->assertSee('Leo');
+    }
+
+    public function test_detail_page_shows_zodiac_compatibility_for_customer(): void
+    {
+        [$guide, $profile] = $this->makeVerifiedGuide();
+        $guide->update(['birth_date' => '1990-12-01']); // Sagittarius
+
+        $customer = User::factory()->customer()->create([
+            'birth_date' => '1990-08-10', // Leo
+        ]);
+
+        // Leo × Sagittarius = 92 → "Cosmic Match" tier.
+        $this->actingAs($customer)
+            ->get(route('guides.show', $profile))
+            ->assertOk()
+            ->assertSee('Zodiac Match')
+            ->assertSee('92%')
+            ->assertSee('Cosmic Match');
     }
 
     // ── Page 3: Booking ───────────────────────────────────────────
