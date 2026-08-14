@@ -38,6 +38,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/documents/{profile}/{type}', [\App\Http\Controllers\Admin\DocumentController::class, 'show'])->name('admin.documents.show');
+    Route::get('/admin/users', \App\Livewire\Admin\UserManagement::class)->name('admin.users');
+    Route::redirect('/admin/guides', '/admin/users');
     Route::get('/admin/verification', \App\Livewire\Admin\DocumentVerification::class)->name('admin.verification');
     Route::get('/admin/finance', \App\Livewire\Admin\FinancialManagement::class)->name('admin.finance');
 });
