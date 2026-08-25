@@ -1,0 +1,25 @@
+%% DFD Level 0 (Diagram Konteks) — Platform Matchmaking Pemandu Wisata Lokal
+flowchart LR
+    subgraph ENT["Entitas Eksternal"]
+        W["Wisatawan"]
+        G["Pemandu Wisata (Guide)"]
+        A["Admin"]
+        PG["Payment Gateway (QRIS/VA)"]
+        BK["Bank Lokal (Payout)"]
+    end
+
+    P0(("0. Sistem Matchmaking<br/>Pemandu Wisata Lokal"))
+
+    W -->|"registrasi, parameter filter, pesan chat,<br/>pengajuan booking, instruksi bayar, rating"| P0
+    P0 -->|"daftar guide cocok, status booking,<br/>notifikasi, live tracking"| W
+    G -->|"data KYC & legalitas, profil/tarif,<br/>persetujuan order, update status tour,<br/>permintaan withdrawal"| P0
+    P0 -->|"notifikasi order, status verifikasi,<br/>saldo wallet, status payout"| G
+    A -->|"keputusan verifikasi dokumen,<br/>persetujuan withdrawal, moderasi"| P0
+    P0 -->|"antrean dokumen legalitas,<br/>ringkasan escrow, laporan"| A
+    P0 <-->|"request pembayaran<br/>/ notifikasi status"| PG
+    P0 <-->|"instruksi transfer<br/>/ konfirmasi transfer"| BK
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    class W,G,A,PG,BK ext;
+    class P0 proc;

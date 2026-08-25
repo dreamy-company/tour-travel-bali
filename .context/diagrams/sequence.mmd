@@ -1,0 +1,69 @@
+%% Sequence — Alur End-to-End: Registrasi, Matchmaking, Booking-Escrow, Tour, Settlement & Review
+sequenceDiagram
+    autonumber
+    actor C as Wisatawan
+    participant S as Sistem
+    participant G as Guide
+    participant A as Admin
+    participant PG as Payment Gateway
+    participant B as Bank
+
+    Note over C,S: Fase 1 — Registrasi & Verifikasi
+    C->>S: Registrasi akun (/register/customer)
+    G->>S: Registrasi guide + unggah KTP, KTPP, SKCK, pas foto, SOP sign-off
+    S-->>G: Akun tersimpan (pending_verification)
+    S->>A: Notifikasi antrean dokumen legalitas
+    A->>S: Verifikasi dokumen (approve)
+    S-->>G: Status akun verified / active
+
+    Note over C,S: Fase 2 — Matchmaking & Pre-Booking Chat
+    C->>S: Filter guide (spesialisasi, gaya komunikasi, tarif)
+    S-->>C: Daftar guide cocok
+    C->>S: Kirim pesan chat
+    S->>G: Teruskan pesan real-time
+    G->>S: Balas pesan + kesepakatan custom itinerary
+    S-->>C: Balasan real-time
+
+    Note over C,S: Fase 3 — Booking & Pembayaran Escrow
+    C->>S: Ajukan booking + custom itinerary
+    S-->>C: Booking dibuat (pending_confirmation)
+    S->>G: Notifikasi order baru
+    alt Guide menyetujui
+        G->>S: Setujui order
+        S-->>C: Permintaan pembayaran (waiting_payment)
+        C->>S: Instruksi pembayaran
+        S->>PG: Request pembayaran QRIS/VA
+        PG-->>C: Halaman pembayaran
+        C->>PG: Konfirmasi pembayaran
+        PG-->>S: Notifikasi status paid
+        S->>S: Booking = confirmed, escrow = paid_in_escrow
+        S-->>C: Booking terkonfirmasi
+        S-->>G: Order confirmed
+    else Guide menolak / wisatawan batal
+        G->>S: Tolak order
+        S-->>C: Booking dibatalkan (cancelled)
+    end
+
+    Note over C,S,G: Fase 4 — Pelaksanaan Tour (Live Tracking)
+    G->>S: Update status heading_to_location
+    S-->>C: Live tracking (stepper)
+    G->>S: Start tour (ongoing)
+    S-->>C: Status tour aktif
+    G->>S: End tour (completed)
+
+    Note over S: Fase 5 — Settlement Otomatis
+    S->>S: Split otomatis: 10% komisi platform / 90% net guide
+    S->>S: Escrow = released_to_guide, wallet guide +90% net
+
+    Note over G,S,A,B: Fase 6 — Withdrawal (Payout)
+    G->>S: Ajukan penarikan dana
+    S-->>G: Antrean payout dibuat (pending)
+    S->>A: Notifikasi antrean payout
+    A->>S: Setujui payout
+    S->>B: Instruksi transfer ke rekening guide
+    B-->>S: Konfirmasi transfer
+    S-->>G: Dana masuk rekening (withdrawal success)
+
+    Note over C,S: Fase 7 — Rating & Ulasan
+    C->>S: Kirim rating (1-5) & ulasan
+    S-->>C: Ulasan tersimpan di profil guide

@@ -1,0 +1,115 @@
+%% DFD Level 1 — Platform Matchmaking Pemandu Wisata Lokal (8 proses, 9 data store)
+flowchart TB
+    subgraph ENT["Entitas Eksternal"]
+        W["Wisatawan"]
+        G["Pemandu Wisata (Guide)"]
+        A["Admin"]
+        PG["Payment Gateway (QRIS/VA)"]
+        BK["Bank Lokal"]
+        SCH["Scheduler (Cron Harian)"]
+    end
+
+    subgraph PRO["Proses Sistem"]
+        P1(("1.0 Registrasi &<br/>Verifikasi KYC"))
+        P2(("2.0 Matchmaking<br/>& Pencarian"))
+        P3(("3.0 Pre-Booking<br/>Chat"))
+        P4(("4.0 Booking &<br/>Pembayaran Escrow"))
+        P5(("5.0 Pelaksanaan<br/>Tour & Tracking"))
+        P6(("6.0 Settlement, Wallet<br/>& Withdrawal"))
+        P7(("7.0 Rating<br/>& Ulasan"))
+        P8(("8.0 Auto-Suspend<br/>Lisensi"))
+    end
+
+    subgraph DS["Data Store"]
+        D1[["D1 Users"]]
+        D2[["D2 Guide Profiles"]]
+        D3[["D3 Tour Packages"]]
+        D4[["D4 Bookings"]]
+        D5[["D5 Escrow Transactions"]]
+        D6[["D6 Guide Wallets"]]
+        D7[["D7 Withdrawals"]]
+        D8[["D8 Chat Messages"]]
+        D9[["D9 Reviews"]]
+    end
+
+    %% ===================== Proses 1.0 =====================
+    W -->|"data registrasi (FR-01-01)"| P1
+    G -->|"data KYC: NIK KTP, KTPP, SKCK,<br/>pas foto, SOP sign-off (FR-01-02/03)"| P1
+    G -->|"kelola profil, tarif & paket (UAT-P02)"| P1
+    P1 -->|"buat user baru (pending_verification)"| D1
+    P1 -->|"buat profil guide + dokumen legalitas"| D2
+    P1 -->|"simpan/ubah paket wisata"| D3
+    P1 -->|"notifikasi antrean dokumen baru"| A
+    A -->|"keputusan verifikasi<br/>(approve / reject) (FR-01-04)"| P1
+    P1 -->|"update status user (active/suspended)"| D1
+    P1 -->|"update is_verified"| D2
+    P1 -->|"hasil verifikasi"| G
+
+    %% ===================== Proses 2.0 =====================
+    W -->|"parameter filter: spesialisasi,<br/>gaya komunikasi, tarif (FR-02-01)"| P2
+    D2 -->|"profil guide terverifikasi"| P2
+    D3 -->|"paket & tarif aktif"| P2
+    D9 -->|"agregasi rating"| P2
+    P2 -->|"daftar guide cocok"| W
+
+    %% ===================== Proses 3.0 =====================
+    W -->|"pesan chat"| P3
+    G -->|"balasan chat"| P3
+    P3 -->|"simpan pesan"| D8
+    D8 -->|"riwayat pesan"| P3
+    P3 -->|"pesan real-time (FR-02-02)"| W
+    P3 -->|"pesan real-time"| G
+
+    %% ===================== Proses 4.0 =====================
+    W -->|"pengajuan booking +<br/>custom itinerary (FR-02-03)"| P4
+    D3 -->|"hitung total harga"| P4
+    P4 -->|"buat booking<br/>(pending_confirmation)"| D4
+    P4 -->|"notifikasi order baru"| G
+    G -->|"persetujuan order"| P4
+    P4 -->|"update status (waiting_payment)"| D4
+    P4 -->|"permintaan pembayaran"| W
+    W -->|"instruksi pembayaran"| P4
+    P4 -->|"request pembayaran QRIS/VA"| PG
+    PG -->|"notifikasi status pembayaran"| P4
+    P4 -->|"update status (confirmed)"| D4
+    P4 -->|"catat escrow (paid_in_escrow)"| D5
+
+    %% ===================== Proses 5.0 =====================
+    G -->|"update status tour:<br/>heading_to_location → ongoing →<br/>completed (FR-03-01)"| P5
+    D4 -->|"data booking aktif"| P5
+    P5 -->|"update status booking"| D4
+    P5 -->|"status & progres tour real-time<br/>(FR-03-02)"| W
+    P5 -->|"event tour completed"| P6
+
+    %% ===================== Proses 6.0 =====================
+    D4 -->|"booking completed"| P6
+    P6 -->|"split otomatis: 10%% komisi /<br/>90%% net (FR-03-03)"| D5
+    P6 -->|"kredit 90%% ke wallet"| D6
+    G -->|"permintaan withdrawal<br/>(FR-04-01)"| P6
+    P6 -->|"buat antrean payout (pending)"| D7
+    A -->|"persetujuan payout<br/>(FR-04-02)"| P6
+    P6 -->|"instruksi transfer"| BK
+    BK -->|"konfirmasi transfer"| P6
+    P6 -->|"update status payout (success/failed)"| D7
+    P6 -->|"debit saldo wallet"| D6
+    P6 -->|"saldo & status payout"| G
+
+    %% ===================== Proses 7.0 =====================
+    D4 -->|"validasi booking completed"| P7
+    W -->|"rating (1-5) & ulasan<br/>(UAT-W04)"| P7
+    P7 -->|"simpan ulasan"| D9
+    P7 -->|"konfirmasi ulasan tersimpan"| W
+
+    %% ===================== Proses 8.0 =====================
+    SCH -->|"trigger 00:00 setiap hari<br/>(FR-04-03)"| P8
+    D2 -->|"cek kedaluwarsa KTPP/SKCK"| P8
+    D1 -->|"data akun & status"| P8
+    P8 -->|"update status user (suspended)"| D1
+    P8 -->|"notifikasi auto-suspend"| A
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    classDef store fill:#fdf6e3,stroke:#b58900,stroke-width:2px;
+    class W,G,A,PG,BK,SCH ext;
+    class P1,P2,P3,P4,P5,P6,P7,P8 proc;
+    class D1,D2,D3,D4,D5,D6,D7,D8,D9 store;

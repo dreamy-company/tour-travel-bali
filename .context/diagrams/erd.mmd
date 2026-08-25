@@ -1,0 +1,116 @@
+%% ERD — Platform Matchmaking Pemandu Wisata Lokal (SRS Bab 3)
+erDiagram
+    USERS {
+        bigint    id            PK
+        varchar   name
+        varchar   email         UK
+        varchar   password
+        enum      role          "admin, guide, customer"
+        varchar   phone_number
+        enum      status        "pending_verification, active, suspended"
+        timestamp created_at
+        timestamp updated_at
+    }
+    GUIDE_PROFILES {
+        bigint     id                 PK
+        bigint     user_id            FK
+        varchar    nik_ktp            UK
+        varchar    ktpp_number        UK
+        date       ktpp_expired_at
+        date       skck_expired_at
+        text       bio
+        enum       communication_style "santai, edukatif, profesional, ekspresif"
+        json       specializations    "cafe_hopping, photography, nightlife, nature, culture_history, healing"
+        json       languages          "Indonesian, English, Japanese"
+        enum       tariff_mode        "hourly, daily"
+        decimal    base_rate
+        boolean    is_verified
+        timestamp  created_at
+        timestamp  updated_at
+    }
+    TOUR_PACKAGES {
+        bigint     id               PK
+        bigint     guide_profile_id FK
+        varchar    title
+        text       description
+        decimal    price
+        json       destinations
+        boolean    is_active
+        timestamp  created_at
+        timestamp  updated_at
+    }
+    BOOKINGS {
+        bigint    id                PK
+        bigint    customer_id       FK
+        bigint    guide_id          FK
+        bigint    tour_package_id   FK "nullable - custom itinerary"
+        date      booking_date
+        text      pickup_location
+        json      custom_itinerary
+        decimal   total_price
+        enum      status            "pending_confirmation, waiting_payment, confirmed, heading_to_location, ongoing, completed, cancelled, disputed"
+        timestamp created_at
+        timestamp updated_at
+    }
+    ESCROW_TRANSACTIONS {
+        bigint    id                 PK
+        bigint    booking_id         FK
+        decimal   gross_amount
+        decimal   platform_commission "10% komisi platform"
+        decimal   guide_net_amount   "90% dana net guide"
+        varchar   payment_gateway_ref
+        enum      status             "waiting_payment, paid_in_escrow, released_to_guide, refunded"
+        timestamp created_at
+        timestamp updated_at
+    }
+    GUIDE_WALLETS {
+        bigint    id              PK
+        bigint    guide_id        FK
+        decimal   current_balance
+        timestamp created_at
+        timestamp updated_at
+    }
+    WITHDRAWALS {
+        bigint    id                  PK
+        bigint    guide_wallet_id     FK
+        decimal   amount
+        varchar   bank_name
+        varchar   bank_account_number
+        varchar   bank_account_name
+        enum      status              "pending, success, failed"
+        timestamp created_at
+        timestamp updated_at
+    }
+    CHAT_MESSAGES {
+        bigint    id           PK
+        bigint    booking_id   FK "nullable - pre-booking chat"
+        bigint    sender_id    FK
+        bigint    receiver_id  FK
+        text      message
+        boolean   is_read
+        timestamp created_at
+    }
+    REVIEWS {
+        bigint    id          PK
+        bigint    booking_id  FK
+        bigint    customer_id FK
+        bigint    guide_id    FK
+        int       rating      "skala 1-5"
+        text      comment
+        timestamp created_at
+    }
+
+    USERS ||--o| GUIDE_PROFILES : "memiliki profil guide (1:1)"
+    GUIDE_PROFILES ||--o{ TOUR_PACKAGES : "menyediakan paket (1:N)"
+    USERS ||--o{ BOOKINGS : "memesan sebagai customer (1:N)"
+    USERS ||--o{ BOOKINGS : "dipesan sebagai guide (1:N)"
+    TOUR_PACKAGES |o--o{ BOOKINGS : "dipesan berulang (opsional)"
+    BOOKINGS ||--o| ESCROW_TRANSACTIONS : "memiliki transaksi escrow (1:1)"
+    USERS ||--o| GUIDE_WALLETS : "memiliki dompet (1:1)"
+    GUIDE_WALLETS ||--o{ WITHDRAWALS : "penarikan dana (1:N)"
+    BOOKINGS o|--o{ CHAT_MESSAGES : "pesan terkait booking (opsional)"
+    USERS ||--o{ CHAT_MESSAGES : "mengirim pesan (sender)"
+    USERS ||--o{ CHAT_MESSAGES : "menerima pesan (receiver)"
+    BOOKINGS ||--o| REVIEWS : "dinilai (1:1 per kebijakan bisnis)"
+    USERS ||--o{ REVIEWS : "memberi ulasan (customer)"
+    USERS ||--o{ REVIEWS : "menerima ulasan (guide)"
