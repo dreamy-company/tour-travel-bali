@@ -1,7 +1,7 @@
-<div class="flex flex-col gap-6">
-    <x-auth-header 
-        :title="__('Register as a Tour Guide')" 
-        :description="__('Complete the 4-step verification to list your services in Bali.')" 
+<div class="flex flex-col gap-6 py-12">
+    <x-auth-header
+        :title="__('Register as a Tour Guide')"
+        :description="__('Complete the 4-step verification to list your services in Bali.')"
     />
 
     <!-- Step Progress Indicator -->

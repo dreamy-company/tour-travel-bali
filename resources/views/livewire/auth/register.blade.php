@@ -1,5 +1,5 @@
 <x-layouts::auth :title="__('Register')">
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-6 py-12">
         {{-- Header --}}
         <div class="space-y-1.5 text-center">
             <h1 class="text-2xl font-semibold tracking-[-0.44px] text-ink">{{ __('Create your account') }}</h1>
