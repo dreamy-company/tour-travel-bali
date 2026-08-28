@@ -74,21 +74,133 @@
             <hr class="border-hairline" />
 
             <form wire:submit="updatePassword" class="space-y-5">
-                <div class="space-y-1.5">
-                    <label for="current-password" class="text-sm font-semibold text-ink block">{{ __('Current Password') }}</label>
-                    <input id="current-password" wire:model="current_password" type="password" autocomplete="current-password" class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch" />
+                <!-- Current Password -->
+                <div class="space-y-1.5" x-data="{ show: false }">
+                    <div class="flex items-center justify-between">
+                        <label for="current-password" class="text-sm font-semibold text-ink block">{{ __('Current Password') }}</label>
+                        <button 
+                            type="button" 
+                            @click="show = !show" 
+                            class="text-xs font-medium text-muted hover:text-ink transition-colors select-none flex items-center gap-1 cursor-pointer"
+                            tabindex="-1"
+                        >
+                            <span x-show="!show" class="flex items-center gap-1">
+                                <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                <span>{{ __('Show') }}</span>
+                            </span>
+                            <span x-show="show" x-cloak class="flex items-center gap-1">
+                                <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                                <span>{{ __('Hide') }}</span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input 
+                            id="current-password" 
+                            wire:model="current_password" 
+                            :type="show ? 'text' : 'password'"
+                            type="password" 
+                            autocomplete="current-password" 
+                            class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch pr-10" 
+                        />
+                        <button 
+                            type="button" 
+                            @click="show = !show" 
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-soft hover:text-ink cursor-pointer transition-colors"
+                            tabindex="-1"
+                            aria-label="{{ __('Toggle password visibility') }}"
+                        >
+                            <svg x-show="!show" class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                            <svg x-show="show" x-cloak class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                        </button>
+                    </div>
                     @error('current_password') <span class="text-xs text-error-text block mt-1">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div class="space-y-1.5">
-                        <label for="new-password" class="text-sm font-semibold text-ink block">{{ __('New Password') }}</label>
-                        <input id="new-password" wire:model="new_password" type="password" autocomplete="new-password" class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch" />
+                    <!-- New Password -->
+                    <div class="space-y-1.5" x-data="{ show: false }">
+                        <div class="flex items-center justify-between">
+                            <label for="new-password" class="text-sm font-semibold text-ink block">{{ __('New Password') }}</label>
+                            <button 
+                                type="button" 
+                                @click="show = !show" 
+                                class="text-xs font-medium text-muted hover:text-ink transition-colors select-none flex items-center gap-1 cursor-pointer"
+                                tabindex="-1"
+                            >
+                                <span x-show="!show" class="flex items-center gap-1">
+                                    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                    <span>{{ __('Show') }}</span>
+                                </span>
+                                <span x-show="show" x-cloak class="flex items-center gap-1">
+                                    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                                    <span>{{ __('Hide') }}</span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <input 
+                                id="new-password" 
+                                wire:model="new_password" 
+                                :type="show ? 'text' : 'password'"
+                                type="password" 
+                                autocomplete="new-password" 
+                                class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch pr-10" 
+                            />
+                            <button 
+                                type="button" 
+                                @click="show = !show" 
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-soft hover:text-ink cursor-pointer transition-colors"
+                                tabindex="-1"
+                                aria-label="{{ __('Toggle password visibility') }}"
+                            >
+                                <svg x-show="!show" class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                <svg x-show="show" x-cloak class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                            </button>
+                        </div>
                         @error('new_password') <span class="text-xs text-error-text block mt-1">{{ $message }}</span> @enderror
                     </div>
-                    <div class="space-y-1.5">
-                        <label for="new-password-confirmation" class="text-sm font-semibold text-ink block">{{ __('Confirm New Password') }}</label>
-                        <input id="new-password-confirmation" wire:model="new_password_confirmation" type="password" autocomplete="new-password" class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch" />
+
+                    <!-- Confirm New Password -->
+                    <div class="space-y-1.5" x-data="{ show: false }">
+                        <div class="flex items-center justify-between">
+                            <label for="new-password-confirmation" class="text-sm font-semibold text-ink block">{{ __('Confirm New Password') }}</label>
+                            <button 
+                                type="button" 
+                                @click="show = !show" 
+                                class="text-xs font-medium text-muted hover:text-ink transition-colors select-none flex items-center gap-1 cursor-pointer"
+                                tabindex="-1"
+                            >
+                                <span x-show="!show" class="flex items-center gap-1">
+                                    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                    <span>{{ __('Show') }}</span>
+                                </span>
+                                <span x-show="show" x-cloak class="flex items-center gap-1">
+                                    <svg class="size-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                                    <span>{{ __('Hide') }}</span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <input 
+                                id="new-password-confirmation" 
+                                wire:model="new_password_confirmation" 
+                                :type="show ? 'text' : 'password'"
+                                type="password" 
+                                autocomplete="new-password" 
+                                class="w-full text-sm px-3.5 py-2.5 rounded-lg border border-hairline bg-white text-ink focus:outline-hidden focus:ring-2 focus:ring-rausch pr-10" 
+                            />
+                            <button 
+                                type="button" 
+                                @click="show = !show" 
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-soft hover:text-ink cursor-pointer transition-colors"
+                                tabindex="-1"
+                                aria-label="{{ __('Toggle password visibility') }}"
+                            >
+                                <svg x-show="!show" class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                <svg x-show="show" x-cloak class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                            </button>
+                        </div>
                         @error('new_password_confirmation') <span class="text-xs text-error-text block mt-1">{{ $message }}</span> @enderror
                     </div>
                 </div>
