@@ -1,5 +1,5 @@
 <x-layouts::auth :title="__('Log in')">
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-6 py-12">
         {{-- Header --}}
         <div class="space-y-1.5 text-center">
             <h1 class="text-2xl font-semibold tracking-[-0.44px] text-ink">{{ __('Welcome back') }}</h1>
@@ -9,7 +9,6 @@
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <x-passkey-verify />
 
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5">
             @csrf

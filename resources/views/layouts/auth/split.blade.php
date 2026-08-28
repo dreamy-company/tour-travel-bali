@@ -3,7 +3,7 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white text-ink antialiased">
+    <body class="min-h-screen bg-white text-ink antialiased overflow-hidden">
         <div class="grid min-h-svh lg:grid-cols-2">
             {{-- LEFT: Branded Bali panel --}}
             <div class="relative hidden lg:flex flex-col justify-between overflow-hidden bg-gradient-to-br from-rausch via-[#d90b45] to-[#7d0b2c] p-10 xl:p-14 text-white">
@@ -55,7 +55,7 @@
             </div>
 
             {{-- RIGHT: Auth form --}}
-            <div class="flex items-center justify-center px-6 py-10 sm:px-10 lg:py-0">
+            <div class="flex items-center justify-center px-6 h-full sm:px-10 ">
                 <div class="flex w-full max-w-md flex-col">
                     {{-- Mobile brand --}}
                     <a href="{{ route('home') }}" wire:navigate class="mb-8 flex items-center justify-center gap-2 lg:hidden">
