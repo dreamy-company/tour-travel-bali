@@ -17,7 +17,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.auth-large')]
+#[Layout('layouts.auth')]
 #[Title('Register as Tour Guide')]
 class GuideRegister extends Component
 {
