@@ -1,0 +1,141 @@
+%% Sequence Diagram — Alur End-to-End (sesuai implementasi per 2026-10-10)
+sequenceDiagram
+    autonumber
+    actor C as Wisatawan
+    actor G as Guide
+    actor A as Admin
+    participant S as Sistem (Laravel + Livewire)
+    participant DB as Database (MySQL)
+    participant MT as Midtrans (Snap)
+    participant SCH as Scheduler (Cron)
+
+    rect rgb(240, 246, 252)
+    Note over C,DB: Fase 1 — Registrasi & Verifikasi KYC
+    C->>S: Registrasi (/register) + birth_date
+    S->>DB: INSERT users (role=customer, status=active)
+    G->>S: Registrasi 4 langkah (/register/guide): akun, KYC tier 1, legalitas tier 2, SOP
+    S->>DB: INSERT users (status=pending_verification)
+    S->>DB: INSERT guide_profiles + simpan file KTP, pas foto, KTPP, SKCK, surat sehat
+    S-->>G: Halaman "under review"
+    A->>S: Buka antrean verifikasi (/admin/verification)
+    S->>DB: SELECT guide_profiles (is_verified=false)
+    S-->>A: Daftar profil + dokumen legalitas
+    alt Dokumen valid
+        A->>S: Approve
+        S->>DB: is_verified=true, users.status=active
+    else Dokumen tidak valid
+        A->>S: Reject + alasan
+        S->>DB: rejection_reason, users.status=suspended
+    end
+    end
+
+    rect rgb(245, 250, 240)
+    Note over C,DB: Fase 2 — Matchmaking & Chat Pre-Booking
+    C->>S: Filter guide (spesialisasi, gaya komunikasi, tarif, bahasa, zodiak)
+    S->>DB: SELECT guide aktif & terverifikasi + rata-rata rating
+    S->>S: Hitung kecocokan zodiak (Cosmic Match)
+    S-->>C: Daftar guide terurut
+    opt Simpan ke favorit
+        C->>S: Toggle favorit
+        S->>DB: INSERT / DELETE favorites
+    end
+    C->>S: Kirim pesan pre-booking (/chat/{guide})
+    S->>DB: INSERT chat_messages (booking_id=null)
+    loop Polling setiap 3 detik
+        G->>S: pollMessages()
+        S->>DB: SELECT pesan baru, set is_read=true
+        S-->>G: Pesan baru
+    end
+    G->>S: Balas pesan (sepakati itinerary)
+    S->>DB: INSERT chat_messages
+    end
+
+    rect rgb(252, 246, 240)
+    Note over C,MT: Fase 3 — Booking (Confirmation-First) & Pembayaran Escrow
+    C->>S: Ajukan booking (paket / custom destinasi, tanggal, jam jemput)
+    S->>S: Hitung total_price (paket / base_rate x estimasi jam / tarif harian)
+    S->>DB: INSERT bookings (pending_confirmation)
+    S->>DB: INSERT escrow_transactions (waiting_payment)
+    G->>S: Lihat order masuk (/guide/orders)
+    alt Guide menerima
+        G->>S: acceptBooking()
+        S->>DB: bookings.status = waiting_payment
+        C->>S: Bayar sekarang (/my-bookings)
+        S->>MT: createSnapTransaction (order_id BOOK-{id}-{ts})
+        MT-->>S: snap_token + redirect_url
+        S->>DB: Simpan snap_token, redirect_url
+        S-->>C: Redirect ke halaman pembayaran
+        C->>MT: Bayar via QRIS / VA / kartu kredit
+        MT->>S: POST /payment/webhook (settlement / capture)
+        S->>S: Verifikasi signature_key
+        S->>DB: bookings = confirmed, escrow = paid_in_escrow
+    else Guide menolak
+        G->>S: rejectBooking()
+        S->>DB: bookings.status = rejected
+    end
+    end
+
+    rect rgb(248, 240, 252)
+    Note over C,DB: Fase 4 — Pelaksanaan Tour & Live Tracking
+    G->>S: advanceStatus(heading_to_location)
+    S->>DB: UPDATE bookings.status
+    loop Polling setiap 5 detik
+        C->>S: refreshBooking()
+        S-->>C: Stepper status tour
+    end
+    G->>S: advanceStatus(ongoing)
+    S->>DB: UPDATE bookings.status
+    G->>S: advanceStatus(completed)
+    S->>DB: UPDATE bookings.status = completed
+    end
+
+    rect rgb(240, 252, 248)
+    Note over G,DB: Fase 5 — Settlement Otomatis (EscrowReleaseService)
+    S->>S: komisi = 10% gross, net = 90% gross
+    S->>DB: escrow = released_to_guide (komisi, net)
+    S->>DB: guide_wallets.current_balance += net
+    end
+
+    rect rgb(252, 252, 238)
+    Note over C,DB: Fase 6 — Rating & Ulasan
+    S-->>C: Modal ulasan (booking completed)
+    alt Wisatawan memberi ulasan
+        C->>S: submitReview(rating 1-5, komentar)
+        S->>DB: INSERT reviews (1 per booking)
+    else Lewati
+        C->>S: skipReview()
+    end
+    end
+
+    rect rgb(252, 240, 240)
+    Note over G,DB: Fase 7 — Withdrawal (Payout)
+    G->>S: Ajukan penarikan (/guide/payouts)
+    S->>DB: Cek saldo, current_balance -= amount
+    S->>DB: INSERT withdrawals (pending)
+    A->>S: Tinjau antrean payout (/admin/finance)
+    alt Disetujui
+        A->>S: approvePayout() setelah transfer bank manual
+        S->>DB: withdrawals.status = success
+    else Ditolak
+        A->>S: rejectPayout()
+        S->>DB: withdrawals.status = failed, saldo dikembalikan
+    end
+    end
+
+    rect rgb(244, 244, 244)
+    Note over A,DB: Fase 8 — Penanganan Sengketa (booking disputed)
+    alt Dana dirilis ke guide
+        A->>S: releaseToGuide()
+        S->>DB: escrow = released_to_guide, wallet += 90%, booking = completed
+    else Refund ke wisatawan
+        A->>S: refundCustomer()
+        S->>DB: escrow = refunded, booking = completed
+    end
+    end
+
+    rect rgb(238, 238, 252)
+    Note over SCH,DB: Fase 9 — Auto-Suspend Lisensi (harian)
+    SCH->>S: guides:check-expired-licenses
+    S->>DB: SELECT guide aktif dengan KTPP / SKCK kedaluwarsa
+    S->>DB: users.status = suspended
+    end

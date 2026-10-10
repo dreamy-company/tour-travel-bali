@@ -1,0 +1,38 @@
+%% DFD Level 2 — Proses 3.0 Kelola Profil & Layanan
+flowchart LR
+    G["Pemandu Wisata (Guide)"]
+    W["Wisatawan"]
+
+    P31(("3.1<br/>Update Persona<br/>Guide"))
+    P32(("3.2<br/>Atur Mode<br/>& Tarif"))
+    P33(("3.3<br/>Kelola Paket<br/>Wisata"))
+    P34(("3.4<br/>Update Profil &<br/>Preferensi Wisatawan"))
+
+    D1[["D1 Users"]]
+    D2[["D2 Guide Profiles"]]
+    D3[["D3 Tour Packages"]]
+
+    G -->|"bio, gaya komunikasi, spesialisasi, bahasa"| P31
+    D2 -->|"persona saat ini"| P31
+    P31 -->|"update persona"| D2
+
+    G -->|"tariff_mode, base_rate"| P32
+    P32 -->|"update tarif"| D2
+
+    G -->|"judul, deskripsi, harga, destinasi, status aktif"| P33
+    D2 -->|"status is_verified"| P33
+    D3 -->|"daftar paket"| P33
+    P33 -->|"create / update / delete paket"| D3
+    P33 -->|"daftar paket terbaru"| G
+
+    W -->|"nama, telepon, tanggal lahir, password, persona wisatawan"| P34
+    D1 -->|"profil saat ini"| P34
+    P34 -->|"update profil & traveler_preferences"| D1
+    P34 -->|"konfirmasi"| W
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    classDef store fill:#fdf6e3,stroke:#b58900,stroke-width:2px;
+    class G,W ext;
+    class P31,P32,P33,P34 proc;
+    class D1,D2,D3 store;

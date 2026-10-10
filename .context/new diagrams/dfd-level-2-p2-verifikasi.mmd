@@ -1,0 +1,52 @@
+%% DFD Level 2 — Proses 2.0 Verifikasi & Manajemen Pengguna
+flowchart LR
+    A["Admin"]
+    G["Pemandu Wisata (Guide)"]
+
+    P21(("2.1<br/>Tampilkan Antrean<br/>Verifikasi"))
+    P22(("2.2<br/>Tinjau Dokumen<br/>Legalitas"))
+    P23(("2.3<br/>Approve /<br/>Reject Guide"))
+    P24(("2.4<br/>Edit Data<br/>Pengguna"))
+    P25(("2.5<br/>Ban / Unban &<br/>Strike Guide"))
+    P26(("2.6<br/>Hapus Paket, Dokumen<br/>atau Akun Guide"))
+
+    D1[["D1 Users"]]
+    D2[["D2 Guide Profiles"]]
+    D3[["D3 Tour Packages"]]
+    D5[["D5 Escrow Transactions"]]
+    D11[["D11 Berkas Dokumen KYC"]]
+
+    D2 -->|"profil is_verified=false"| P21
+    D1 -->|"data akun guide"| P21
+    P21 -->|"antrean verifikasi"| A
+    A -->|"pilih profil"| P22
+    D2 -->|"detail KYC & tanggal kedaluwarsa"| P22
+    D11 -->|"file KTP, KTPP, SKCK, surat sehat, pas foto"| P22
+    P22 -->|"pratinjau dokumen"| A
+    A -->|"keputusan + alasan penolakan"| P23
+    P23 -->|"is_verified / rejection_reason"| D2
+    P23 -->|"status active / suspended"| D1
+    P23 -->|"hasil verifikasi"| G
+
+    A -->|"data pengguna baru"| P24
+    D1 -->|"data pengguna"| P24
+    P24 -->|"update nama, email, role, status"| D1
+
+    A -->|"perintah ban / strike"| P25
+    P25 -->|"status banned / active"| D1
+    P25 -->|"strikes + 1"| D2
+
+    A -->|"perintah hapus"| P26
+    D5 -->|"cek dana paid_in_escrow"| P26
+    P26 -->|"hapus paket"| D3
+    P26 -->|"hapus berkas"| D11
+    P26 -->|"reset dokumen, is_verified=false"| D2
+    P26 -->|"hapus akun"| D1
+    P26 -->|"hasil / ditolak bila dana escrow aktif"| A
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    classDef store fill:#fdf6e3,stroke:#b58900,stroke-width:2px;
+    class A,G ext;
+    class P21,P22,P23,P24,P25,P26 proc;
+    class D1,D2,D3,D5,D11 store;

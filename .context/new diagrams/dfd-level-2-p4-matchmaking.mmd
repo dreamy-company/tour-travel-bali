@@ -1,0 +1,41 @@
+%% DFD Level 2 — Proses 4.0 Pencarian & Matchmaking
+flowchart LR
+    W["Wisatawan"]
+
+    P41(("4.1<br/>Saring Guide<br/>(Filter)"))
+    P42(("4.2<br/>Hitung Kecocokan<br/>Zodiak"))
+    P43(("4.3<br/>Tampilkan<br/>Profil Guide"))
+    P44(("4.4<br/>Kelola<br/>Favorit"))
+
+    D1[["D1 Users"]]
+    D2[["D2 Guide Profiles"]]
+    D3[["D3 Tour Packages"]]
+    D9[["D9 Reviews"]]
+    D10[["D10 Favorites"]]
+
+    W -->|"spesialisasi, gaya komunikasi, rentang & mode tarif, bahasa, zodiak"| P41
+    D1 -->|"guide berstatus active"| P41
+    D2 -->|"profil terverifikasi"| P41
+    D9 -->|"rata-rata rating"| P41
+    P41 -->|"kandidat guide"| P42
+    D1 -->|"birth_date wisatawan & guide"| P42
+    W -->|"aktifkan Cosmic Match"| P42
+    P42 -->|"daftar guide terurut + skor kecocokan"| W
+
+    W -->|"pilih guide"| P43
+    D2 -->|"profil & persona"| P43
+    D3 -->|"paket aktif"| P43
+    D9 -->|"ulasan & rata-rata rating"| P43
+    P43 -->|"halaman profil guide"| W
+
+    W -->|"toggle / hapus favorit"| P44
+    P44 -->|"insert / delete favorit"| D10
+    D10 -->|"daftar favorit"| P44
+    P44 -->|"wishlist"| W
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    classDef store fill:#fdf6e3,stroke:#b58900,stroke-width:2px;
+    class W ext;
+    class P41,P42,P43,P44 proc;
+    class D1,D2,D3,D9,D10 store;

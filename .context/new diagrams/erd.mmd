@@ -1,0 +1,149 @@
+%% ERD — Platform Matchmaking Pemandu Wisata Lokal (sesuai migrasi database/migrations per 2026-10-10)
+%% Tabel infrastruktur Laravel (sessions, password_reset_tokens, cache, jobs, passkeys) tidak digambarkan.
+erDiagram
+    USERS {
+        bigint    id                        PK
+        varchar   name
+        varchar   email                     UK
+        timestamp email_verified_at         "nullable"
+        varchar   password
+        text      two_factor_secret         "nullable"
+        text      two_factor_recovery_codes "nullable"
+        timestamp two_factor_confirmed_at   "nullable"
+        varchar   phone_number              "nullable"
+        date      birth_date                "nullable - turunan zodiak"
+        enum      role                      "customer, guide, admin"
+        enum      status                    "pending_verification, active, suspended, banned"
+        json      traveler_preferences      "nullable - persona wisatawan"
+        varchar   remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+    GUIDE_PROFILES {
+        bigint    id                  PK
+        bigint    user_id             FK,UK
+        varchar   ktp_number          UK "NIK KTP"
+        varchar   ktp_photo           "nullable"
+        varchar   headshot            "nullable - pas foto"
+        varchar   ktpp_number         "lisensi HPI"
+        varchar   ktpp_file           "nullable"
+        date      ktpp_expired_at
+        varchar   skck_file           "nullable"
+        date      skck_expired_at
+        varchar   surat_sehat_file    "nullable"
+        text      vehicle_details     "nullable"
+        text      bio                 "nullable"
+        enum      communication_style "santai, edukatif, profesional, ekspresif"
+        json      specializations     "cafe_hopping, photography, nightlife, nature, culture_history, healing"
+        json      languages
+        enum      tariff_mode         "package, hourly, daily"
+        decimal   base_rate
+        boolean   is_verified
+        timestamp signed_sop_at       "nullable - tanda tangan SOP"
+        text      rejection_reason    "nullable"
+        int       strikes             "default 0"
+        timestamp created_at
+        timestamp updated_at
+    }
+    TOUR_PACKAGES {
+        bigint    id          PK
+        bigint    guide_id    FK "users.id"
+        varchar   title
+        text      description
+        decimal   price
+        json      destinations
+        boolean   is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+    BOOKINGS {
+        bigint    id                  PK
+        bigint    customer_id         FK "users.id"
+        bigint    guide_id            FK "users.id"
+        bigint    tour_package_id     FK "nullable - custom itinerary"
+        text      pickup_location
+        text      dropoff_location    "nullable"
+        json      custom_destinations "nullable"
+        date      schedule_date
+        time      pickup_time
+        decimal   total_price
+        enum      status              "pending_confirmation, rejected, waiting_payment, confirmed, heading_to_location, ongoing, completed, cancelled, disputed"
+        timestamp created_at
+        timestamp updated_at
+    }
+    ESCROW_TRANSACTIONS {
+        bigint    id                    PK
+        bigint    booking_id            FK,UK
+        varchar   transaction_reference
+        enum      payment_method        "qris, credit_card, virtual_account"
+        decimal   gross_amount
+        decimal   platform_commission   "10%"
+        decimal   guide_net_amount      "90%"
+        enum      status                "waiting_payment, paid_in_escrow, released_to_guide, refunded"
+        varchar   snap_token            "nullable - Midtrans Snap"
+        text      redirect_url          "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+    GUIDE_WALLETS {
+        bigint    id              PK
+        bigint    guide_id        FK,UK "users.id"
+        decimal   current_balance
+        timestamp created_at
+        timestamp updated_at
+    }
+    WITHDRAWALS {
+        bigint    id                  PK
+        bigint    guide_id            FK "users.id"
+        decimal   amount
+        varchar   bank_name
+        varchar   bank_account_number
+        varchar   bank_account_name
+        enum      status              "pending, processing, success, failed"
+        timestamp created_at
+        timestamp updated_at
+    }
+    CHAT_MESSAGES {
+        bigint    id          PK
+        bigint    booking_id  FK "nullable - null = chat pre-booking"
+        bigint    sender_id   FK "users.id"
+        bigint    receiver_id FK "users.id, nullable"
+        text      message
+        boolean   is_read
+        timestamp created_at
+        timestamp updated_at
+    }
+    REVIEWS {
+        bigint    id          PK
+        bigint    booking_id  FK,UK
+        bigint    customer_id FK "users.id"
+        bigint    guide_id    FK "users.id"
+        tinyint   rating      "1-5"
+        text      comment     "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+    FAVORITES {
+        bigint    id          PK
+        bigint    customer_id FK "users.id, UK(customer_id, guide_id)"
+        bigint    guide_id    FK "users.id"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    USERS               ||--o| GUIDE_PROFILES      : "memiliki profil guide"
+    USERS               ||--o{ TOUR_PACKAGES       : "menyediakan (guide)"
+    USERS               ||--o{ BOOKINGS            : "memesan (customer)"
+    USERS               ||--o{ BOOKINGS            : "menerima order (guide)"
+    TOUR_PACKAGES       |o--o{ BOOKINGS            : "dipilih pada"
+    BOOKINGS            ||--o| ESCROW_TRANSACTIONS : "dibayar melalui"
+    USERS               ||--o| GUIDE_WALLETS       : "memiliki dompet (guide)"
+    USERS               ||--o{ WITHDRAWALS         : "mengajukan payout (guide)"
+    BOOKINGS            |o--o{ CHAT_MESSAGES       : "thread booking"
+    USERS               ||--o{ CHAT_MESSAGES       : "mengirim"
+    USERS               |o--o{ CHAT_MESSAGES       : "menerima"
+    BOOKINGS            ||--o| REVIEWS             : "dinilai"
+    USERS               ||--o{ REVIEWS             : "menulis (customer)"
+    USERS               ||--o{ REVIEWS             : "menerima (guide)"
+    USERS               ||--o{ FAVORITES           : "menyimpan (customer)"
+    USERS               ||--o{ FAVORITES           : "difavoritkan (guide)"

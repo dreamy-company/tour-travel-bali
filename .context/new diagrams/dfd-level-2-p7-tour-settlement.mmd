@@ -1,0 +1,29 @@
+%% DFD Level 2 — Proses 7.0 Pelaksanaan Tour & Settlement
+flowchart LR
+    G["Pemandu Wisata (Guide)"]
+    W["Wisatawan"]
+
+    P71(("7.1<br/>Update Status<br/>Tour"))
+    P72(("7.2<br/>Live Tracking<br/>(Stepper)"))
+    P73(("7.3<br/>Rilis Escrow &<br/>Bagi Hasil"))
+
+    D4[["D4 Bookings"]]
+    D5[["D5 Escrow Transactions"]]
+    D6[["D6 Guide Wallets"]]
+
+    G -->|"heading_to_location / ongoing / completed"| P71
+    D4 -->|"booking aktif guide"| P71
+    P71 -->|"update status booking"| D4
+    P71 -->|"pemicu: booking completed"| P73
+    D4 -->|"status booking terkini"| P72
+    P72 -->|"progres tour (tiap 5 detik)"| W
+    D5 -->|"gross_amount"| P73
+    P73 -->|"komisi 10%, net 90%, released_to_guide"| D5
+    P73 -->|"current_balance + net"| D6
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    classDef store fill:#fdf6e3,stroke:#b58900,stroke-width:2px;
+    class G,W ext;
+    class P71,P72,P73 proc;
+    class D4,D5,D6 store;

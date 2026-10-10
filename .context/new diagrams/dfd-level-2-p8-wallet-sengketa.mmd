@@ -1,0 +1,44 @@
+%% DFD Level 2 — Proses 8.0 Wallet, Withdrawal & Sengketa
+flowchart LR
+    G["Pemandu Wisata (Guide)"]
+    A["Admin"]
+
+    P81(("8.1<br/>Tampilkan Saldo<br/>& Riwayat"))
+    P82(("8.2<br/>Ajukan<br/>Withdrawal"))
+    P83(("8.3<br/>Approve / Reject<br/>Payout"))
+    P84(("8.4<br/>Selesaikan<br/>Sengketa"))
+
+    D4[["D4 Bookings"]]
+    D5[["D5 Escrow Transactions"]]
+    D6[["D6 Guide Wallets"]]
+    D7[["D7 Withdrawals"]]
+
+    D6 -->|"current_balance"| P81
+    D7 -->|"riwayat payout"| P81
+    P81 -->|"saldo & riwayat"| G
+
+    G -->|"nominal, bank, no. rekening, nama pemilik"| P82
+    D6 -->|"cek saldo cukup"| P82
+    P82 -->|"debit saldo"| D6
+    P82 -->|"withdrawal (pending)"| D7
+
+    D7 -->|"antrean pending"| P83
+    P83 -->|"antrean payout"| A
+    A -->|"approve (setelah transfer manual) / reject"| P83
+    P83 -->|"status success / failed"| D7
+    P83 -->|"refund saldo bila ditolak"| D6
+
+    D4 -->|"booking disputed"| P84
+    D5 -->|"data escrow"| P84
+    P84 -->|"daftar sengketa"| A
+    A -->|"rilis ke guide / refund ke wisatawan"| P84
+    P84 -->|"released_to_guide / refunded"| D5
+    P84 -->|"kredit net 90% bila dirilis"| D6
+    P84 -->|"booking = completed"| D4
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    classDef store fill:#fdf6e3,stroke:#b58900,stroke-width:2px;
+    class G,A ext;
+    class P81,P82,P83,P84 proc;
+    class D4,D5,D6,D7 store;

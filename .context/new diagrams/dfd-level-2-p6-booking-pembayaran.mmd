@@ -1,0 +1,47 @@
+%% DFD Level 2 — Proses 6.0 Booking & Pembayaran Escrow
+flowchart LR
+    W["Wisatawan"]
+    G["Pemandu Wisata (Guide)"]
+    MT["Payment Gateway (Midtrans)"]
+
+    P61(("6.1<br/>Hitung Harga &<br/>Ajukan Booking"))
+    P62(("6.2<br/>Konfirmasi Order<br/>oleh Guide"))
+    P63(("6.3<br/>Buat Transaksi<br/>Snap"))
+    P64(("6.4<br/>Proses Notifikasi<br/>Pembayaran"))
+
+    D2[["D2 Guide Profiles"]]
+    D3[["D3 Tour Packages"]]
+    D4[["D4 Bookings"]]
+    D5[["D5 Escrow Transactions"]]
+
+    W -->|"paket / destinasi kustom, tanggal, jam & lokasi jemput"| P61
+    D2 -->|"tariff_mode, base_rate"| P61
+    D3 -->|"harga paket"| P61
+    P61 -->|"booking (pending_confirmation)"| D4
+    P61 -->|"escrow (waiting_payment)"| D5
+    P61 -->|"ringkasan booking"| W
+
+    D4 -->|"order pending"| P62
+    P62 -->|"order masuk"| G
+    G -->|"terima / tolak"| P62
+    P62 -->|"status waiting_payment / rejected"| D4
+
+    W -->|"permintaan bayar"| P63
+    D4 -->|"booking waiting_payment"| P63
+    D5 -->|"redirect_url tersimpan"| P63
+    P63 -->|"order_id, gross_amount, data customer"| MT
+    MT -->|"snap_token, redirect_url"| P63
+    P63 -->|"simpan snap_token, redirect_url"| D5
+    P63 -->|"redirect ke halaman bayar"| W
+
+    MT -->|"webhook: order_id, status, signature_key"| P64
+    P64 -->|"status confirmed"| D4
+    P64 -->|"status paid_in_escrow"| D5
+    P64 -->|"respons 200 / 4xx"| MT
+
+    classDef ext fill:#f9f9f9,stroke:#333,stroke-dasharray:4 3;
+    classDef proc fill:#e1f0fa,stroke:#1f6fb2,stroke-width:2px;
+    classDef store fill:#fdf6e3,stroke:#b58900,stroke-width:2px;
+    class W,G,MT ext;
+    class P61,P62,P63,P64 proc;
+    class D2,D3,D4,D5 store;
