@@ -32,16 +32,17 @@
     @php
         $currentStep = match ($booking->status) {
             \App\Enums\BookingStatus::PENDING_CONFIRMATION => 1,
-            \App\Enums\BookingStatus::WAITING_PAYMENT => 1,
-            \App\Enums\BookingStatus::CONFIRMED => 2,
-            \App\Enums\BookingStatus::HEADING_TO_LOCATION => 3,
-            \App\Enums\BookingStatus::ONGOING => 4,
-            \App\Enums\BookingStatus::COMPLETED => 5,
+            \App\Enums\BookingStatus::WAITING_PAYMENT => 2,
+            \App\Enums\BookingStatus::CONFIRMED => 3,
+            \App\Enums\BookingStatus::HEADING_TO_LOCATION => 4,
+            \App\Enums\BookingStatus::ONGOING => 5,
+            \App\Enums\BookingStatus::COMPLETED => 6,
             default => 1,
         };
 
         $steps = [
             ['title' => 'Request Sent'],
+            ['title' => 'Awaiting Payment'],
             ['title' => 'Confirmed'],
             ['title' => 'Guide En Route'],
             ['title' => 'Tour Ongoing'],
@@ -61,10 +62,10 @@
                     {{-- Progress --}}
                     <div
                         class="absolute top-5 left-0 h-1 bg-rausch hidden md:block rounded-full transition-all duration-500"
-                        style="width: {{ (($currentStep-1)/4)*100 }}%">
+                        style="width: {{ (($currentStep-1)/5)*100 }}%">
                     </div>
 
-                    <div class="grid grid-cols-5 relative">
+                    <div class="grid grid-cols-6 relative">
 
                         @foreach($steps as $index => $step)
 
@@ -189,7 +190,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
                 <div class="space-y-1">
                     <p class="text-muted"><strong>Scheduled Date & Time:</strong></p>
-                    <p class="text-ink dark:text-zinc-200 font-semibold">{{ $booking->schedule_date->format('F j, Y') }} at {{ $booking->pickup_time }}</p>
+                    <p class="text-ink dark:text-zinc-200 font-semibold">{{ $booking->schedule_date->format('F j, Y') }} at {{ substr((string) $booking->pickup_time, 0, 5) }}</p>
                 </div>
                 <div class="space-y-1">
                     <p class="text-muted"><strong>Escrow Transaction Reference:</strong></p>

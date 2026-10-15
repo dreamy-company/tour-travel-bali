@@ -171,7 +171,7 @@
                                         #{{ str_pad((string) $booking->id, 8, '0', STR_PAD_LEFT) }}
                                     </span>
                                     <span class="text-[10px] text-zinc-400">
-                                        {{ $booking->schedule_date->format('d M Y') }} · {{ $booking->pickup_time }}
+                                        {{ $booking->schedule_date->format('d M Y') }} · {{ substr((string) $booking->pickup_time, 0, 5) }}
                                     </span>
                                     <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold ring-1 ring-inset bg-red-50 text-red-700 ring-red-700/10 dark:bg-red-950/20 dark:text-red-400 dark:ring-red-500/20">
                                         {{ __('Disputed') }}

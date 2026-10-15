@@ -34,8 +34,9 @@
     @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 {{ ! $this->isVerified ? 'opacity-50 pointer-events-none select-none' : '' }}">
-        <!-- LEFT COLUMN: Rates Configuration (4 Cols) -->
-        <div class="lg:col-span-4 flex flex-col border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs gap-6 h-fit">
+        <!-- LEFT COLUMN: Rates & Persona (4 Cols) -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+        <div class="flex flex-col border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-stone-950 p-6 shadow-xs gap-6 h-fit">
             <div>
                 <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">{{ __('Base Pricing Rates') }}</h3>
                 <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Set your default charging model for custom itineraries.') }}</p>
@@ -147,6 +148,7 @@
                 <svg class="size-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                 {{ __('Update Persona') }}
             </button>
+        </div>
         </div>
 
         <!-- RIGHT COLUMN: Packages Management (8 Cols) -->

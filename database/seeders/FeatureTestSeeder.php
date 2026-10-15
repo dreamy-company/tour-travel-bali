@@ -205,9 +205,9 @@ class FeatureTestSeeder extends Seeder
             'communication_style' => 'santai',
             'specializations' => ['healing', 'culture_history'],
             'languages' => ['id', 'en', 'jp'],
-            'tariff_mode' => TariffMode::PACKAGE,
-            'base_rate' => 0,
-        ], scenario: 'Taurus · PACKAGE-only tariff, order to REJECT (Dewi), inactive package');
+            'tariff_mode' => TariffMode::DAILY,
+            'base_rate' => 650000,
+        ], scenario: 'Taurus · package-focused guide, order to REJECT (Dewi), inactive package');
 
         $guides['kadek'] = $this->guide('Kadek Darma Putra', 'kadek@gmail.com', '2001-01-25', [
             'ktp_number' => '5171012501010006',
@@ -758,20 +758,24 @@ class FeatureTestSeeder extends Seeder
             return null;
         }
 
-        $initials = collect(explode(' ', $name))->take(2)->map(fn ($word) => strtoupper($word[0]))->implode('');
+        // Pastel background derived from the name, with a lighter head-and-shoulders silhouette.
         [$r, $g, $b] = sscanf(substr(md5($name), 0, 6), '%02x%02x%02x');
+        [$r, $g, $b] = array_map(fn ($c) => (int) (150 + $c * 0.35), [$r, $g, $b]);
 
-        // Draw the initials small, then upscale them onto the 400x400 avatar.
-        $text = imagecreatetruecolor(20, 16);
-        imagefill($text, 0, 0, imagecolorallocate($text, $r, $g, $b));
-        imagestring($text, 5, 1, 0, $initials, imagecolorallocate($text, 255, 255, 255));
-
-        $img = imagecreatetruecolor(400, 400);
+        // Draw at 2x and downsample so the curved edges come out smooth.
+        $size = 800;
+        $img = imagecreatetruecolor($size, $size);
         imagefill($img, 0, 0, imagecolorallocate($img, $r, $g, $b));
-        imagecopyresized($img, $text, 40, 80, 0, 0, 320, 256, 20, 16);
-        imagedestroy($text);
 
-        return $this->jpeg($img);
+        $figure = imagecolorallocate($img, min(255, $r + 45), min(255, $g + 45), min(255, $b + 45));
+        imagefilledellipse($img, 400, 330, 300, 300, $figure);
+        imagefilledellipse($img, 400, 820, 620, 520, $figure);
+
+        $out = imagecreatetruecolor(400, 400);
+        imagecopyresampled($out, $img, 0, 0, 0, 0, 400, 400, $size, $size);
+        imagedestroy($img);
+
+        return $this->jpeg($out);
     }
 
     private function jpeg(\GdImage $img): string

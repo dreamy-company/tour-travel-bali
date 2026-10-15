@@ -58,7 +58,7 @@
                         <div>
                             <h3 class="text-base font-semibold text-ink">{{ $booking->guide->name }}</h3>
                             <p class="text-sm text-muted">
-                                {{ $booking->schedule_date->format('D, M j, Y') }} · {{ $booking->pickup_time }} · {{ $booking->pickup_location }}
+                                {{ $booking->schedule_date->format('D, M j, Y') }} · {{ substr((string) $booking->pickup_time, 0, 5) }} · {{ $booking->pickup_location }}
                             </p>
                         </div>
                     </div>
@@ -189,7 +189,7 @@
                                         @if ($past->review)
                                             <span class="inline-flex items-center gap-1 text-sm text-muted">
                                                 <svg class="size-3.5 fill-current text-star" viewBox="0 0 20 20"><path d="M10.868 2.784a.75.75 0 0 0-1.736 0l-1.87 3.79-4.183.608a.75.75 0 0 0-.416 1.28l3.028 2.951-.715 4.167a.75.75 0 0 0 1.09.79l3.74-1.966 3.74 1.966a.75.75 0 0 0 1.09-.79l-.715-4.167 3.028-2.951a.75.75 0 0 0-.416-1.28l-4.183-.608-1.87-3.79Z"/></svg>
-                                                {{ $past->review->rating }} ★
+                                                {{ $past->review->rating }}
                                             </span>
                                         @else
                                             <button type="button" wire:click="openReview({{ $past->id }})" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-rausch text-white hover:bg-rausch-active transition-colors">

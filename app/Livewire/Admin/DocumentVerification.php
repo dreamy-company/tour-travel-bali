@@ -48,6 +48,7 @@ class DocumentVerification extends Component
     {
         return GuideProfile::with('user')
             ->where('is_verified', false)
+            ->whereNull('rejection_reason')
             ->latest()
             ->get();
     }

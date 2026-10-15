@@ -56,7 +56,7 @@
                             <hr class="border-zinc-100 dark:border-zinc-800/50" />
 
                             <div class="space-y-1 text-[10px] text-zinc-600 dark:text-zinc-400">
-                                <p><strong>Date:</strong> {{ $pending->schedule_date->format('F j, Y') }} at {{ $pending->pickup_time }}</p>
+                                <p><strong>Date:</strong> {{ $pending->schedule_date->format('F j, Y') }} at {{ substr((string) $pending->pickup_time, 0, 5) }}</p>
                                 <p class="truncate"><strong>Pickup:</strong> {{ $pending->pickup_location }}</p>
                                 <p class="truncate"><strong>Route:</strong> {{ implode(' ➔ ', $pending->custom_destinations) }}</p>
                             </div>
@@ -113,7 +113,7 @@
                             <div class="min-w-0">
                                 <p class="text-xs font-bold text-zinc-900 dark:text-zinc-100">{{ $booking->customer->name }}</p>
                                 <p class="text-[10px] text-zinc-500">{{ $booking->customer->phone_number }}</p>
-                                <p class="text-[9px] text-zinc-400 mt-0.5">{{ $booking->schedule_date->format('M d, Y') }} · {{ $booking->pickup_time }}</p>
+                                <p class="text-[9px] text-zinc-400 mt-0.5">{{ $booking->schedule_date->format('M d, Y') }} · {{ substr((string) $booking->pickup_time, 0, 5) }}</p>
                             </div>
                         </div>
 

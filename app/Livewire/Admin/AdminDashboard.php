@@ -194,7 +194,7 @@ class AdminDashboard extends Component
         // 1. Stats Metrics
         $totalCustomers = User::where('role', UserRole::CUSTOMER)->where('status', UserStatus::ACTIVE)->count();
         $verifiedGuides = User::where('role', UserRole::GUIDE)->where('status', UserStatus::ACTIVE)->whereHas('guideProfile', fn($q) => $q->where('is_verified', true))->count();
-        $activeEscrowBookings = Booking::whereNotIn('status', [BookingStatus::COMPLETED, BookingStatus::REJECTED, BookingStatus::DISPUTED])->count();
+        $activeEscrowBookings = Booking::whereNotIn('status', [BookingStatus::COMPLETED, BookingStatus::REJECTED, BookingStatus::CANCELLED, BookingStatus::DISPUTED])->count();
         $totalEscrowFunds = EscrowTransaction::where('status', EscrowStatus::PAID_IN_ESCROW)->sum('gross_amount');
 
         // 2. KYC verification queue
