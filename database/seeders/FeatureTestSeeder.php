@@ -22,6 +22,7 @@ use App\Models\Withdrawal;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -460,7 +461,7 @@ class FeatureTestSeeder extends Seeder
             'customer_id' => $customer->id,
             'guide_id' => $guide->id,
             'tour_package_id' => $package?->id,
-            'pickup_location' => 'Hotel lobby, '.fake()->randomElement(['Kuta', 'Seminyak', 'Ubud', 'Sanur', 'Nusa Dua']),
+            'pickup_location' => 'Hotel lobby, '.Arr::random(['Kuta', 'Seminyak', 'Ubud', 'Sanur', 'Nusa Dua']),
             'dropoff_location' => null,
             'custom_destinations' => $package?->destinations ?? ['Tanah Lot Temple', 'Jatiluwih Rice Terrace'],
             'schedule_date' => $scheduleDate->toDateString(),
@@ -480,7 +481,7 @@ class FeatureTestSeeder extends Seeder
                 ? 'BOOK-'.$booking->id.'-'.$createdAt->copy()->addDay()->timestamp
                 : 'TXN-'.str_pad((string) $booking->id, 8, '0', STR_PAD_LEFT).'-SEED',
             'payment_method' => $paid
-                ? fake()->randomElement(PaymentMethod::cases())
+                ? Arr::random(PaymentMethod::cases())
                 : PaymentMethod::QRIS,
             'gross_amount' => $price,
             'platform_commission' => $price * 0.10,
