@@ -6,7 +6,7 @@
     <body class="min-h-screen bg-white text-ink antialiased">
         <div class="grid min-h-svh lg:grid-cols-2">
             {{-- LEFT: Branded Bali panel --}}
-            <div class="relative hidden lg:flex flex-col justify-between overflow-hidden bg-gradient-to-br from-rausch via-[#d90b45] to-[#7d0b2c] p-10 xl:p-14 text-white">
+            <div class="relative hidden lg:flex lg:sticky lg:top-0 lg:h-svh flex-col justify-between overflow-hidden bg-gradient-to-br from-rausch via-[#d90b45] to-[#7d0b2c] p-10 xl:p-14 text-white">
                 {{-- Decorative layers --}}
                 <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:20px_20px]"></div>
                 <div class="absolute -top-28 -right-20 size-96 rounded-full bg-white/10 blur-3xl"></div>
@@ -55,7 +55,7 @@
             </div>
 
             {{-- RIGHT: Auth form --}}
-            <div class="flex items-center justify-center px-6 py-10 sm:px-10 lg:py-0">
+            <div class="flex items-center justify-center px-6 py-10 sm:px-10 lg:py-12">
                 <div class="flex w-full max-w-md flex-col">
                     {{-- Mobile brand --}}
                     <a href="{{ route('home') }}" wire:navigate class="mb-8 flex items-center justify-center gap-2 lg:hidden">
